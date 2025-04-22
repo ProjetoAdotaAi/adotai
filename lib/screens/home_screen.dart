@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'user_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -14,7 +15,7 @@ class _HomeScreenState extends State<HomeScreen> {
     Center(child: Text('Pets')),
     Center(child: Text('Buscar')),
     Center(child: Text('Favoritos')),
-    Center(child: Text('Perfil')),
+    UserScreen(),
   ];
 
   @override
