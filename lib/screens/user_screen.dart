@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../widgets/user/action_tile.dart';
 import '../widgets/user/user_card.dart';
 import 'edit_profile_screen.dart';
@@ -17,7 +16,6 @@ class UserScreen extends StatelessWidget {
     final String imageUrl = 'assets/images/default_icon.png';
 
     return Scaffold(
-      appBar: AppBar(),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
