@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/user/action_tile.dart';
 import '../widgets/user/user_card.dart';
+import 'adoption_preferences_screen.dart';
 import 'edit_profile_screen.dart';
 
 class UserScreen extends StatelessWidget {
@@ -39,6 +40,10 @@ class UserScreen extends StatelessWidget {
               icon: Icons.filter_alt_outlined,
               label: 'Preferências para Adoção',
               onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const AdoptionPreferncesScreen()),
+                );
               },
             ),
             const SizedBox(height: 12),
