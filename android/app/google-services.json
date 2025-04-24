@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "371806562079",
+    "project_id": "adota-i",
+    "storage_bucket": "adota-i.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:371806562079:android:a06866d6edf73b184bf22a",
+        "android_client_info": {
+          "package_name": "com.example.adotai"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB5memDqIuIfU0Sx07m1X65TIMMAFJBLdM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
