@@ -3,6 +3,7 @@ import '../widgets/user/action_tile.dart';
 import '../widgets/user/user_card.dart';
 import 'adoption_preferences_screen.dart';
 import 'edit_profile_screen.dart';
+import 'login_screen.dart';
 
 class UserScreen extends StatelessWidget {
   const UserScreen({super.key});
@@ -72,6 +73,11 @@ class UserScreen extends StatelessWidget {
               icon: Icons.exit_to_app,
               label: 'Sair',
               onTap: () {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => LoginScreen()),
+                  (route) => false,
+                );
               },
             ),
           ],
