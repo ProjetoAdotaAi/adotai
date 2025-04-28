@@ -119,7 +119,7 @@ class _LoginBody extends StatelessWidget {
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppTheme.primaryColor,
-                          fixedSize: const Size(200, 50),
+                          fixedSize: const Size(220, 50),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14),
                           ),
@@ -137,7 +137,7 @@ class _LoginBody extends StatelessWidget {
                         onPressed: () {},
                         style: OutlinedButton.styleFrom(
                           side: const BorderSide(color: Colors.orange, width: 2),
-                          fixedSize: const Size(200, 50),
+                          fixedSize: const Size(220, 50),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14),
                           ),

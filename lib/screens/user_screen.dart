@@ -20,67 +20,69 @@ class UserScreen extends StatelessWidget {
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            UserCard(
-              name: name,
-              phone: phone,
-              instagram: instagram,
-              location: location,
-              description: description,
-              imageUrl: imageUrl,
-              onEdit: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const EditProfileScreen()),
-                );
-              },
-            ),
-            const SizedBox(height: 16),
-            ActionTile(
-              icon: Icons.filter_alt_outlined,
-              label: 'Preferências para Adoção',
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const AdoptionPreferncesScreen()),
-                );
-              },
-            ),
-            const SizedBox(height: 12),
-            ActionTile(
-              icon: Icons.pets,
-              label: 'Meus Pets',
-              onTap: () {
-              },
-            ),
-            const SizedBox(height: 12),
-            ActionTile(
-              icon: Icons.favorite_border,
-              label: 'Meus Favoritos',
-              onTap: () {
-              },
-            ),
-            const SizedBox(height: 12),
-            ActionTile(
-              icon: Icons.lock,
-              label: 'Alterar Senha',
-              onTap: () {
-              },
-            ),
-            const SizedBox(height: 12),
-            ActionTile(
-              icon: Icons.exit_to_app,
-              label: 'Sair',
-              onTap: () {
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(builder: (context) => LoginScreen()),
-                  (route) => false,
-                );
-              },
-            ),
-          ],
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              UserCard(
+                name: name,
+                phone: phone,
+                instagram: instagram,
+                location: location,
+                description: description,
+                imageUrl: imageUrl,
+                onEdit: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const EditProfileScreen()),
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
+              ActionTile(
+                icon: Icons.filter_alt_outlined,
+                label: 'Preferências para Adoção',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const AdoptionPreferncesScreen()),
+                  );
+                },
+              ),
+              const SizedBox(height: 12),
+              ActionTile(
+                icon: Icons.pets,
+                label: 'Meus Pets',
+                onTap: () {
+                },
+              ),
+              const SizedBox(height: 12),
+              ActionTile(
+                icon: Icons.favorite_border,
+                label: 'Meus Favoritos',
+                onTap: () {
+                },
+              ),
+              const SizedBox(height: 12),
+              ActionTile(
+                icon: Icons.lock,
+                label: 'Alterar Senha',
+                onTap: () {
+                },
+              ),
+              const SizedBox(height: 12),
+              ActionTile(
+                icon: Icons.exit_to_app,
+                label: 'Sair',
+                onTap: () {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => LoginScreen()),
+                    (route) => false,
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
