@@ -14,6 +14,8 @@ class PermissionService {
   static Future<bool> requestBackgroundLocationPermission() async {
     if (Platform.isAndroid) {
       return await Permission.locationAlways.request().isGranted;
+    } else if (Platform.isIOS) {
+      return await Permission.locationAlways.request().isGranted;
     }
     return false;
   }
