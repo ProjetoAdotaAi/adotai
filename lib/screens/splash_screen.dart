@@ -1,7 +1,8 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../screens/login_screen.dart';
-import '../utils/splash.dart';
 import '../theme/app_theme.dart';
+import '../services/permission_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -12,7 +13,7 @@ class SplashScreen extends StatefulWidget {
 
 class SplashScreenState extends State<SplashScreen> {
   String _deniedPermission = '';
-  late final SplashUtils _controller;
+  bool _isPermissionChecked = false;
 
   @override
   void initState() {
@@ -23,18 +24,24 @@ class SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _initialize() async {
-    _controller = SplashUtils(
-      onPermissionDenied: (permission) {
-        setState(() {
-          _deniedPermission = permission;
-        });
-      },
-      context: context,
-    );
-    await _controller.checkPermissions();
 
-    if (_deniedPermission.isEmpty) {
+    bool locationPermissionGranted = await PermissionService.requestLocationPermission();
+    Timer(Duration(seconds: 5), () {
+      if (!_isPermissionChecked) {
+        _navigateToLogin();
+      }
+    });
+
+    if (locationPermissionGranted) {
+      setState(() {
+        _isPermissionChecked = true;
+      });
       _navigateToLogin();
+    } else {
+      setState(() {
+        _isPermissionChecked = true;
+        _deniedPermission = 'Localização';
+      });
     }
   }
 

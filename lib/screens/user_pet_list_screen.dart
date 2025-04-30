@@ -6,14 +6,14 @@ import '../widgets/home/appbar.dart';
 import '../widgets/home/navigation_bar.dart';
 import '../widgets/pet/pet_card.dart';
 
-class FavoritePets extends StatefulWidget {
-  const FavoritePets({super.key});
+class UserPetList extends StatefulWidget {
+  const UserPetList({super.key});
 
   @override
-  State<FavoritePets> createState() => _FavoritePetsState();
+  State<UserPetList> createState() => _UserPetListState();
 }
 
-class _FavoritePetsState extends State<FavoritePets> {
+class _UserPetListState extends State<UserPetList> {
   @override
   Widget build(BuildContext context) {
     int _currentIndex = 4;

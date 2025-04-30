@@ -1,3 +1,5 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/material.dart';
 import '../widgets/login/login_text_field.dart';
 import '../widgets/login/login_links.dart';
@@ -15,10 +17,17 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   bool obscurePassword = true;
+  bool isLoading = false;
 
   void togglePasswordVisibility() {
     setState(() {
       obscurePassword = !obscurePassword;
+    });
+  }
+
+  void setLoading(bool value) {
+    setState(() {
+      isLoading = value;
     });
   }
 
@@ -110,7 +119,7 @@ class _LoginBody extends StatelessWidget {
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppTheme.primaryColor,
-                          fixedSize: const Size(200, 50),
+                          fixedSize: const Size(220, 50),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14),
                           ),
@@ -128,28 +137,36 @@ class _LoginBody extends StatelessWidget {
                         onPressed: () {},
                         style: OutlinedButton.styleFrom(
                           side: const BorderSide(color: Colors.orange, width: 2),
-                          fixedSize: const Size(200, 50),
+                          fixedSize: const Size(220, 50),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14),
                           ),
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Image.asset(
-                              'assets/images/google.png',
-                              width: 20,
-                              height: 20,
-                            ),
-                            const SizedBox(width: 10),
-                            const Text(
-                              'Entrar com Google',
-                              style: TextStyle(
-                                color: Colors.orange,
-                                fontSize: 14,
+                        child: GestureDetector(
+                          onTap: () async {
+                            bool isLogged = await login(context);
+                            if (isLogged) {
+                              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HomeScreen()));
+                            }
+                          },
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Image.asset(
+                                'assets/images/google.png',
+                                width: 20,
+                                height: 20,
                               ),
-                            ),
-                          ],
+                              const SizedBox(width: 10),
+                              const Text(
+                                'Entrar com Google',
+                                style: TextStyle(
+                                  color: Colors.orange,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                       const SizedBox(height: 20),
@@ -189,5 +206,34 @@ class _LoginBody extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<bool> login(BuildContext context) async {
+    final state = context.findAncestorStateOfType<_LoginScreenState>()!;
+    state.setLoading(true);
+
+    try {
+      final user = await GoogleSignIn().signIn();
+      if (user == null) {
+        state.setLoading(false);
+        return false;
+      }
+
+      GoogleSignInAuthentication userAuth = await user.authentication;
+
+      var credential = GoogleAuthProvider.credential(
+        idToken: userAuth.idToken,
+        accessToken: userAuth.accessToken,
+      );
+
+      await FirebaseAuth.instance.signInWithCredential(credential);
+
+      return FirebaseAuth.instance.currentUser != null;
+    } catch (e) {
+      return false;
+    } finally {
+      final state = context.findAncestorStateOfType<_LoginScreenState>()!;
+      state.setLoading(false);
+    }
   }
 }

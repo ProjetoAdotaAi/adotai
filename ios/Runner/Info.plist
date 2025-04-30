@@ -49,7 +49,7 @@
     <key>NSLocationWhenInUseUsageDescription</key>
     <string>Precisamos da sua localização para oferecer melhor funcionalidade.</string>
 
-    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+    <key>NSLocationAlwaysUsageDescription</key>
     <string>Precisamos da sua localização em segundo plano para funcionalidades contínuas.</string>
 
     <key>UIBackgroundModes</key>

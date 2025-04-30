@@ -6,7 +6,7 @@ Adotai é um aplicativo Flutter para facilitar o processo de adoção de animais
 
 1. Clone o repositório:
 
-  `` git clone https://github.com/seuusuario/adotai.git ``
+  `` git clone https://github.com/ProjetoAdotaAi/adotai ``
 
 2. Navegue até o diretório do projeto:
 
