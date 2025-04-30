@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../widgets/user/action_tile.dart';
 import '../widgets/user/user_card.dart';
 import 'edit_profile_screen.dart';
+import '../screens/user_pet_list_screen.dart';
 
 class UserScreen extends StatelessWidget {
   const UserScreen({super.key});
@@ -12,7 +13,8 @@ class UserScreen extends StatelessWidget {
     final String phone = '45 99999-9999';
     final String instagram = '@instagram';
     final String location = 'Endereço';
-    final String description = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vitae pharetra nibh, quis condimentum diam. Pellentesque bibendum nisi imperdiet ante eleifend, ac luctus ipsum aliquam.';
+    final String description =
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vitae pharetra nibh, quis condimentum diam. Pellentesque bibendum nisi imperdiet ante eleifend, ac luctus ipsum aliquam.';
     final String imageUrl = 'assets/images/default_icon.png';
 
     return Scaffold(
@@ -38,37 +40,25 @@ class UserScreen extends StatelessWidget {
             ActionTile(
               icon: Icons.filter_alt_outlined,
               label: 'Preferências para Adoção',
-              onTap: () {
-              },
+              onTap: () {},
             ),
             const SizedBox(height: 12),
-            ActionTile(
-              icon: Icons.pets,
-              label: 'Meus Pets',
-              onTap: () {
-              },
-            ),
+            ActionTile(icon: Icons.pets, label: 'Meus Pets', onTap: () {}),
             const SizedBox(height: 12),
             ActionTile(
               icon: Icons.favorite_border,
               label: 'Meus Favoritos',
               onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const UserPetList()),
+                );
               },
             ),
             const SizedBox(height: 12),
-            ActionTile(
-              icon: Icons.lock,
-              label: 'Alterar Senha',
-              onTap: () {
-              },
-            ),
+            ActionTile(icon: Icons.lock, label: 'Alterar Senha', onTap: () {}),
             const SizedBox(height: 12),
-            ActionTile(
-              icon: Icons.exit_to_app,
-              label: 'Sair',
-              onTap: () {
-              },
-            ),
+            ActionTile(icon: Icons.exit_to_app, label: 'Sair', onTap: () {}),
           ],
         ),
       ),

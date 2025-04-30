@@ -12,6 +12,7 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.8
   permission_handler: ^12.0.0+1
+  http: ^1.3.0
   
 
 dev_dependencies:
@@ -21,7 +22,3 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/images/logo.png
-    - assets/images/google.png
-    - assets/images/adotai.png
-    - assets/images/default_icon.png
