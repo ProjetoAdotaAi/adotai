@@ -1,3 +1,4 @@
+import 'package:adotai/screens/user_register.dart';
 import 'package:flutter/material.dart';
 
 class SingInEmailLink extends StatelessWidget {
@@ -8,6 +9,8 @@ class SingInEmailLink extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         debugPrint('Cadastre-se como Cliente');
+        Navigator.push(context, 
+        MaterialPageRoute(builder: (context) => UserRegistrationPage()));
       },
       child: const Text(
         'E-mail',
