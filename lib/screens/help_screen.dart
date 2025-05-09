@@ -87,7 +87,7 @@ class _HelpScreenState extends State<HelpScreen> {
                               _expanded[index]
                                   ? Icons.arrow_drop_up
                                   : Icons.arrow_drop_down,
-                              color: const Color(0xFF6502D4),
+                              color: AppTheme.gradientEnd,
                             ),
                           ],
                         ),
