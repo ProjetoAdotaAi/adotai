@@ -1,4 +1,4 @@
-import 'package:adotai/screens/user_register.dart';
+import 'package:adotai/screens/singUpScreen.dart';
 import 'package:flutter/material.dart';
 
 class SingInEmailLink extends StatelessWidget {
