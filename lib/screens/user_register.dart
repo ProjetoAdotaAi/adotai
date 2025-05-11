@@ -4,7 +4,7 @@ import 'package:adotai/screens/login_screen.dart';
 import 'package:adotai/theme/app_theme.dart';
 import 'package:adotai/widgets/home/appbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+//import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:http/http.dart' as http;
@@ -19,8 +19,8 @@ class _UserRegistrationPageState extends State<UserRegistrationPage> {
 
   final nomeController = TextEditingController();
   final telefoneController = MaskedTextController(mask: '(00) 00000-0000');
-  final emailController = TextEditingController();
   final instagramController = TextEditingController();
+  final emailController = TextEditingController();
   final senhaController = TextEditingController();
   final cepController = MaskedTextController(mask: '00000-000');
   final cidadeController = TextEditingController();
@@ -30,37 +30,69 @@ class _UserRegistrationPageState extends State<UserRegistrationPage> {
   // Etapas do formulário de cadastro
   int etapa = 1;
 
+  Future<void> _salvarCadastroNoBancoDeDados(
+    String userId,
+    String nome,
+    String telefone,
+    String instagram,
+    String email,
+    String senha,
+    String cep,
+    String cidade,
+    String estado,
+    bool isONG,
+  ) async {
+    //10.0.2.2 porta utilizada rodando o app por emulador
+    final url = Uri.parse('http://10.0.2.2:4040/api/users');
+
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: json.encode({
+        'firebaseId': userId,
+        'name': nome,
+        'phone': telefone,
+        'instagram': instagram,
+        'email': email,
+        'password': senha,
+        'address': {'cep': cep, 'city': cidade, 'state': estado},
+        'isOng': isONG,
+      }),
+    );
+
+    if (response.statusCode == 201) {
+      print('Usuário salvo no banco de dados com sucesso');
+    } else {
+      print('Erro ao salvar no backend: ${response.body}');
+    }
+  }
+
   void _salvarCadastro() async {
     if (_formKey.currentState!.validate() && isONG != null) {
       try {
         //Criando o usuário no Firebase Authentication
         UserCredential userCredential = await FirebaseAuth.instance
             .createUserWithEmailAndPassword(
-              email: emailController.text.trim(),
+              email: emailController.text,
               password: senhaController.text,
             );
-
         // Pegando o UID do usuário
         String userId = userCredential.user!.uid;
 
-        // Criando a collection no Firestore com os dados do usuário
-        await FirebaseFirestore.instance.collection('users').doc(userId).set({
-          'codigo': userId,
-          'nome': nomeController.text,
-          'telefone': telefoneController.text,
-          'email': emailController.text,
-          'instagram': instagramController.text,
-          'cep': cepController.text,
-          'cidade': cidadeController.text,
-          'estado': estadoController.text,
-          'perfil':
-              isONG != null
-                  ? (isONG! ? 'ONG' : 'Protetor individual')
-                  : 'Não selecionado',
-        });
+        await _salvarCadastroNoBancoDeDados(
+          userId,
+          nomeController.text,
+          telefoneController.text,
+          instagramController.text,
+          emailController.text,
+          senhaController.text,
+          cepController.text,
+          cidadeController.text,
+          estadoController.text,
+          isONG!,
+        );
 
         //Alerta indicando que o cadastro foi efetuado com sucesso!
-
         showDialog(
           context: context,
           barrierDismissible: false,
@@ -137,18 +169,6 @@ class _UserRegistrationPageState extends State<UserRegistrationPage> {
         ).showSnackBar(SnackBar(content: Text(mensagemErro)));
       }
     }
-
-    print("Nome: ${nomeController.text}");
-    print("Telefone: ${telefoneController.text}");
-    print("Email: ${emailController.text}");
-    print("Email: ${instagramController.text}");
-    print("Senha: ${senhaController.text}");
-    print("CEP: ${cepController.text}");
-    print("Cidade: ${cidadeController.text}");
-    print("Estado: ${estadoController.text}");
-    print(
-      "Perfil: ${isONG != null ? (isONG! ? 'ONG' : 'Protetor individual') : 'Não selecionado'}",
-    );
   }
 
   InputDecoration _inputDecoration(String labelText) {
@@ -254,6 +274,14 @@ class _UserRegistrationPageState extends State<UserRegistrationPage> {
                 SizedBox(height: 20),
 
                 TextFormField(
+                  controller: instagramController,
+                  decoration: _inputDecoration('Instagram'),
+                  keyboardType: TextInputType.twitter,
+                ),
+
+                SizedBox(height: 20),
+
+                TextFormField(
                   controller: emailController,
                   decoration: _inputDecoration('Email *'),
                   keyboardType: TextInputType.emailAddress,
@@ -270,14 +298,6 @@ class _UserRegistrationPageState extends State<UserRegistrationPage> {
                     }
                     return null; // Email válido
                   },
-                ),
-
-                SizedBox(height: 20),
-
-                TextFormField(
-                  controller: instagramController,
-                  decoration: _inputDecoration('Instagram'),
-                  keyboardType: TextInputType.twitter,
                 ),
 
                 SizedBox(height: 20),
