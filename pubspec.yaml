@@ -19,7 +19,16 @@ dependencies:
   cloud_firestore: ^5.6.7
   flutter_masked_text2: ^0.9.1
   http: ^0.13.3
+  flutter_launcher_icons: ^0.14.3
   
+flutter_launcher_icons:
+  image_path: assets/images/small-logo.png
+  ios: true
+  remove_alpha_ios: true
+  android: true
+  adaptive_icon_background: "#0099DD"
+  adaptive_icon_foreground: assets/images/small-logo.png
+
 
 dev_dependencies:
   flutter_test:
