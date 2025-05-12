@@ -40,9 +40,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: _LoginBody(),
-    );
+    return const Scaffold(body: _LoginBody());
   }
 }
 
@@ -53,9 +51,7 @@ class _LoginBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = context.findAncestorStateOfType<_LoginScreenState>()!;
     return Container(
-      decoration: const BoxDecoration(
-        gradient: AppTheme.primaryGradient,
-      ),
+      decoration: const BoxDecoration(gradient: AppTheme.primaryGradient),
       width: double.infinity,
       height: double.infinity,
       child: Center(
@@ -109,13 +105,31 @@ class _LoginBody extends StatelessWidget {
                       ),
                       const SizedBox(height: 20),
                       ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const HomeScreen(),
-                            ),
-                          );
+                        onPressed: () async {
+                          final email = state.emailController.text;
+                          final password = state.passwordController.text;
+
+                          try {
+                            UserCredential userCredential = await FirebaseAuth
+                                .instance
+                                .signInWithEmailAndPassword(
+                                  email: email,
+                                  password: password,
+                                );
+
+                            if (userCredential.user != null) {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const HomeScreen(),
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text("Erro ao fazer login")),
+                            );
+                          }
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppTheme.primaryColor,
@@ -126,17 +140,18 @@ class _LoginBody extends StatelessWidget {
                         ),
                         child: const Text(
                           'Entrar',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                          ),
+                          style: TextStyle(color: Colors.white, fontSize: 18),
                         ),
                       ),
+
                       const SizedBox(height: 20),
                       OutlinedButton(
                         onPressed: () {},
                         style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: Colors.orange, width: 2),
+                          side: const BorderSide(
+                            color: Colors.orange,
+                            width: 2,
+                          ),
                           fixedSize: const Size(220, 50),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14),
@@ -146,7 +161,12 @@ class _LoginBody extends StatelessWidget {
                           onTap: () async {
                             bool isLogged = await login(context);
                             if (isLogged) {
-                              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HomeScreen()));
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const HomeScreen(),
+                                ),
+                              );
                             }
                           },
                           child: Row(
@@ -169,16 +189,14 @@ class _LoginBody extends StatelessWidget {
                           ),
                         ),
                       ),
+
                       const SizedBox(height: 20),
                       const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
                             'Cadastre-se com ',
-                            style: TextStyle(
-                              color: Colors.grey,
-                              fontSize: 14,
-                            ),
+                            style: TextStyle(color: Colors.grey, fontSize: 14),
                           ),
                           SingInEmailLink(),
                         ],
@@ -189,10 +207,7 @@ class _LoginBody extends StatelessWidget {
                         children: [
                           Text(
                             'Cadastre-se como ',
-                            style: TextStyle(
-                              color: Colors.grey,
-                              fontSize: 14,
-                            ),
+                            style: TextStyle(color: Colors.grey, fontSize: 14),
                           ),
                           SingInOngLink(),
                         ],

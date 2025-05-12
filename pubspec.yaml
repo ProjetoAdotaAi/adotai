@@ -16,6 +16,9 @@ dependencies:
   firebase_core: ^3.13.0
   firebase_auth: ^5.5.2
   google_sign_in: ^6.3.0
+  cloud_firestore: ^5.6.7
+  flutter_masked_text2: ^0.9.1
+  http: ^0.13.3
   flutter_launcher_icons: ^0.14.3
   
 flutter_launcher_icons:
@@ -38,3 +41,4 @@ flutter:
     - assets/images/google.png
     - assets/images/adotai.png
     - assets/images/default_icon.png
+    - assets/images/validator.png
