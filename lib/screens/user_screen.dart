@@ -4,6 +4,7 @@ import '../widgets/user/action_tile.dart';
 import '../widgets/user/user_card.dart';
 import 'adoption_preferences_screen.dart';
 import 'edit_profile_screen.dart';
+import 'help_screen.dart';
 import 'login_screen.dart';
 
 class UserScreen extends StatelessWidget {
@@ -39,7 +40,7 @@ class UserScreen extends StatelessWidget {
                   );
                 },
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
               ActionTile(
                 icon: Icons.filter_alt_outlined,
                 label: 'Preferências para Adoção',
@@ -66,6 +67,17 @@ class UserScreen extends StatelessWidget {
                   context,
                   MaterialPageRoute(builder: (_) => const FavoritePets()),
                 );
+                },
+              ),
+              const SizedBox(height: 12),
+              ActionTile(
+                icon: Icons.help_outline,
+                label: 'Ajuda',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => HelpScreen()),
+                  );
                 },
               ),
               const SizedBox(height: 12),

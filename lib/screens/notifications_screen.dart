@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../widgets/home/appbar.dart';
 
-class NotificationsPage extends StatelessWidget {
-  const NotificationsPage({super.key});
+class NotificationsScreen extends StatelessWidget {
+  const NotificationsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
