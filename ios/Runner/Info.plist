@@ -46,6 +46,7 @@
     <key>UIApplicationSupportsIndirectInputEvents</key>
     <true/>
 
+    <!-- Localização -->
     <key>NSLocationWhenInUseUsageDescription</key>
     <string>Precisamos da sua localização para oferecer melhor funcionalidade.</string>
 
@@ -55,6 +56,23 @@
     <key>UIBackgroundModes</key>
     <array>
         <string>location</string>
+    </array>
+
+    <!-- Google Sign-In -->
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>com.googleusercontent.apps.371806562079-acm4u02ngrur3c3ts0vllm8feho89mes</string>
+            </array>
+        </dict>
+    </array>
+
+    <!-- Permissões gerais -->
+    <key>LSApplicationQueriesSchemes</key>
+    <array>
+        <string>google</string>
     </array>
 </dict>
 </plist>

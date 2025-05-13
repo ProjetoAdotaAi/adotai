@@ -20,6 +20,7 @@ dependencies:
   flutter_masked_text2: ^0.9.1
   http: ^0.13.3
   flutter_launcher_icons: ^0.14.3
+  flutter_dotenv: ^5.2.1
   
 flutter_launcher_icons:
   image_path: assets/images/small-logo.png
@@ -42,3 +43,5 @@ flutter:
     - assets/images/adotai.png
     - assets/images/default_icon.png
     - assets/images/validator.png
+    - .env
+    

@@ -143,7 +143,6 @@ class _LoginBody extends StatelessWidget {
                           style: TextStyle(color: Colors.white, fontSize: 18),
                         ),
                       ),
-
                       const SizedBox(height: 20),
                       OutlinedButton(
                         onPressed: () {},
@@ -189,7 +188,6 @@ class _LoginBody extends StatelessWidget {
                           ),
                         ),
                       ),
-
                       const SizedBox(height: 20),
                       const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
