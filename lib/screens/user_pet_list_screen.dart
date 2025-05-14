@@ -13,10 +13,12 @@ class UserPetList extends StatefulWidget {
 }
 
 class _UserPetListState extends State<UserPetList> {
+  String filter = 'Disponíveis';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomAppBar(),
+       appBar: const CustomAppBar(hasBackButton: true,),
       body: Padding(
         padding: EdgeInsets.all(16),
         child: Column(
@@ -24,6 +26,44 @@ class _UserPetListState extends State<UserPetList> {
               children: [
                 const Text('Meus Pets', style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 16),
+                       Row(
+             children: [
+                   ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/add-pet');
+                      },
+                      icon: const Icon(Icons.add, size: 30),
+                      label: const Text('  Adicionar Pet  '),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.orange,
+                        foregroundColor: Colors.white,
+                        iconColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 22),
+                    DropdownButton<String>(
+                      value: filter,
+                      items: <String>['Disponíveis', 'Adotados', 'Todos']
+                          .map((String value) => DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value),
+                              ))
+                          .toList(),
+                      onChanged: (String? newValue) {
+                        if (newValue != null) {
+                          setState(() {
+                            filter = newValue;
+                          });
+                        }
+                      },
+                    ),
+                  ],
+                ),
+           const SizedBox(height: 16),
            Expanded(
               child: FutureBuilder<List<Pet>>(
                 future: ApiService.fetchUserPets(),
@@ -59,3 +99,9 @@ class _UserPetListState extends State<UserPetList> {
     );
   }
 }
+
+
+
+
+
+
