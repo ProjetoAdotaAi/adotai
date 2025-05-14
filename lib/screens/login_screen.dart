@@ -203,10 +203,6 @@ class _LoginBody extends StatelessWidget {
                       const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(
-                            'Cadastre-se como ',
-                            style: TextStyle(color: Colors.grey, fontSize: 14),
-                          ),
                           SingInOngLink(),
                         ],
                       ),

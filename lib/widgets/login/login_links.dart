@@ -33,7 +33,7 @@ class SingInOngLink extends StatelessWidget {
         debugPrint('Cadastre-se como Protetor/ONG');
       },
       child: const Text(
-        'Protetor/ONG',
+        'Esqueci minha senha',
         style: TextStyle(
           color: Colors.orange,
           fontSize: 14,

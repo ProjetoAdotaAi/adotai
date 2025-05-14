@@ -222,8 +222,8 @@ class _UserRegistrationPageState extends State<UserRegistrationPage> {
                       consultarCep(
                         context,
                         cepController.text,
-                        cidadeController.text,
-                        estadoController.text,
+                        estadoController,
+                        cidadeController,
                       );
                     }
                   },
