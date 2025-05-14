@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import '../theme/app_theme.dart';
 import '../widgets/home/appbar.dart';
-import '../widgets/home/navigation_bar.dart';
 
 class PetRegister extends StatefulWidget {
   const PetRegister({super.key});

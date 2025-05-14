@@ -1,4 +1,5 @@
-import 'package:adotai/screens/favorite_pets.dart';
+import 'package:adotai/screens/favorite_pets_screen.dart';
+import 'package:adotai/screens/user_pet_list_screen.dart';
 import 'package:flutter/material.dart';
 import '../widgets/user/action_tile.dart';
 import '../widgets/user/user_card.dart';
@@ -56,6 +57,10 @@ class UserScreen extends StatelessWidget {
                 icon: Icons.pets,
                 label: 'Meus Pets',
                 onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const UserPetList()),
+                  );
                 },
               ),
               const SizedBox(height: 12),
@@ -65,7 +70,7 @@ class UserScreen extends StatelessWidget {
                 onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const FavoritePets()),
+                  MaterialPageRoute(builder: (_) => const Favorite_pets_screen()),
                 );
                 },
               ),

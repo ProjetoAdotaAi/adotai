@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../model/pet_model.dart';
 
-class PetCard extends StatelessWidget {
+class FavoritePetCard extends StatelessWidget {
   final Pet pet;
 
-  const PetCard({super.key, required this.pet});
+  const FavoritePetCard({super.key, required this.pet});
 
   @override
   Widget build(BuildContext context) {

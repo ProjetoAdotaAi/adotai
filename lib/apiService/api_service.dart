@@ -17,7 +17,7 @@ class ApiService {
       ),
       Pet(
         name: 'Tobias',
-        imageUrl: 'https://stories.bnews.com.br/motivos-para-o-vira-lata-caramelo-se-tornar-patrimonio-nacional-brasileiro/assets/21.jpeg',
+        imageUrl: 'https://i0.statig.com.br/bancodeimagens/78/pt/gs/78ptgsfeddfh638dkkzya5p3y.jpg',
       ),
       Pet(
         name: 'Fiapo',
@@ -25,4 +25,29 @@ class ApiService {
       ),
     ];
   }
+
+  static Future<List<Pet>> fetchUserPets() async {
+    await Future.delayed(const Duration(seconds: 1)); // simula requisição
+
+    return [
+      Pet(
+        name: 'Junior',
+        imageUrl: 'https://i.pinimg.com/736x/c6/f5/e3/c6f5e3f6538aba58a1c0b94592f0e4b0.jpg',
+      ),
+      Pet(
+        name: 'Jamelão',
+        imageUrl: 'https://cdn0.peritoanimal.com.br/pt/razas/5/3/7/vira-lata-caramelo_735_0_orig.jpg',
+      ),
+      Pet(
+        name: 'Washington',
+        imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRnfBXWWZRNR2R4KGNkAK6-WVPznB28FWG8Hw&s',
+      ),
+      Pet(
+        name: 'Belinha',
+        imageUrl: 'https://www.doglife.com.br/blog/assets/post/cachorro-reativo-6628fad48fb9841241484f8a/cachorro-reativo.jpg',
+      ),
+    ];
+  }
+
 }
+

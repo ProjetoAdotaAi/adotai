@@ -1,3 +1,4 @@
+import 'package:adotai/widgets/pet/favorite_pets.dart';
 import 'package:flutter/material.dart';
 import '../widgets/home/appbar.dart';
 import '../widgets/home/navigation_bar.dart';
@@ -16,7 +17,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<Widget> _pages = const [
     Center(child: Text('Pets')),
     Center(child: Text('Buscar')),
-    Center(child: Text('Favoritos')),
+    Center(child: FavoritePets()),
     UserScreen(),
   ];
 

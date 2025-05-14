@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import '../apiService/api_service.dart';
-import '../model/pet_model.dart';
-import '../theme/app_theme.dart';
-import '../widgets/home/appbar.dart';
-import '../widgets/home/navigation_bar.dart';
-import '../widgets/pet/pet_card.dart';
+import '../../apiService/api_service.dart';
+import '../../model/pet_model.dart';
+import 'favorite_pet_card.dart';
 
 class FavoritePets extends StatefulWidget {
   const FavoritePets({super.key});
@@ -16,9 +13,7 @@ class FavoritePets extends StatefulWidget {
 class _FavoritePetsState extends State<FavoritePets> {
   @override
   Widget build(BuildContext context) {
-    int _currentIndex = 4;
     return Scaffold(
-      appBar: const CustomAppBar(),
       body: Padding(
         padding: EdgeInsets.all(16),
         child: Column(
@@ -49,7 +44,7 @@ class _FavoritePetsState extends State<FavoritePets> {
                       childAspectRatio: 1,
                     ),
                     itemBuilder: (context, index) {
-                      return PetCard(pet: pets[index]);
+                      return FavoritePetCard(pet: pets[index]);
                     },
                   );
                 },
