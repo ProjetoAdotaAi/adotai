@@ -1,10 +1,10 @@
+import 'package:adotai/screens/splash_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/material.dart';
 import '../widgets/login/login_text_field.dart';
 import '../widgets/login/login_links.dart';
 import '../theme/app_theme.dart';
-import 'home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -40,7 +40,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(body: _LoginBody());
+    return Scaffold(body: _LoginBody());
   }
 }
 
@@ -91,7 +91,7 @@ class _LoginBody extends StatelessWidget {
                         labelText: 'Senha',
                         hintText: 'Digite sua senha...',
                         controller: state.passwordController,
-                        keyboardType: TextInputType.text,
+                        keyboardType: TextInputType.visiblePassword,
                         obscureText: state.obscurePassword,
                         suffixIcon: IconButton(
                           icon: Icon(
@@ -121,7 +121,9 @@ class _LoginBody extends StatelessWidget {
                               Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => const HomeScreen(),
+                                  builder:
+                                      (context) =>
+                                          const SplashScreen(fromLogin: true),
                                 ),
                               );
                             }
@@ -164,7 +166,9 @@ class _LoginBody extends StatelessWidget {
                               Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => const HomeScreen(),
+                                  builder:
+                                      (context) =>
+                                          const SplashScreen(fromLogin: true),
                                 ),
                               );
                             }
@@ -190,7 +194,7 @@ class _LoginBody extends StatelessWidget {
                         ),
                       ),
 
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 30),
                       const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -201,15 +205,15 @@ class _LoginBody extends StatelessWidget {
                           SingInEmailLink(),
                         ],
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 30),
                       const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            'Cadastre-se como ',
+                            'Esqueçeu sua senha? ',
                             style: TextStyle(color: Colors.grey, fontSize: 14),
                           ),
-                          SingInOngLink(),
+                          ForgotPasswordLink(),
                         ],
                       ),
                     ],
