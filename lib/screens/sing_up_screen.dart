@@ -1,10 +1,11 @@
 import 'dart:convert';
-
-import 'package:adotai/screens/login_screen.dart';
+import 'package:adotai/services/via_cep_api.dart';
 import 'package:adotai/theme/app_theme.dart';
 import 'package:adotai/widgets/home/appbar.dart';
+import 'package:adotai/widgets/singup/form_button_style.dart';
+import 'package:adotai/widgets/singup/input_decoration.dart';
+import 'package:adotai/widgets/singup/alert_dialogs.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-//import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:http/http.dart' as http;
@@ -15,6 +16,7 @@ class UserRegistrationPage extends StatefulWidget {
 }
 
 class _UserRegistrationPageState extends State<UserRegistrationPage> {
+  bool obscurePassword = true;
   final _formKey = GlobalKey<FormState>();
 
   final nomeController = TextEditingController();
@@ -92,65 +94,9 @@ class _UserRegistrationPageState extends State<UserRegistrationPage> {
           isONG!,
         );
 
-        //Alerta indicando que o cadastro foi efetuado com sucesso!
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder:
-              (context) => AlertDialog(
-                backgroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                title: null,
-                content: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Center(
-                        child: Image.asset(
-                          'assets/images/validator.png',
-                          width: 50,
-                          height: 50,
-                        ),
-                      ),
-                      SizedBox(height: 35),
-                      Text(
-                        'Seu cadastro foi efetuado com sucesso! Prossiga para a tela de login.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 50),
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => LoginScreen(),
-                            ),
-                          );
-                        },
-                        child: Text(
-                          'Ir para o login',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.primaryColor,
-                          fixedSize: const Size(220, 50),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+        showSuccessDialog(
+          context,
+          "Seu cadastro foi efetuado com sucesso! Prossiga para a tela de login.",
         );
       } on FirebaseAuthException catch (e) {
         String mensagemErro;
@@ -168,59 +114,6 @@ class _UserRegistrationPageState extends State<UserRegistrationPage> {
           context,
         ).showSnackBar(SnackBar(content: Text(mensagemErro)));
       }
-    }
-  }
-
-  InputDecoration _inputDecoration(String labelText) {
-    return InputDecoration(
-      labelText: labelText,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(20),
-        borderSide: BorderSide(color: Colors.black),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(20),
-        borderSide: BorderSide(color: Colors.black),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(20),
-        borderSide: BorderSide(color: AppTheme.primaryColor),
-      ),
-    );
-  }
-
-  ButtonStyle formButtonStyle({Size size = const Size(220, 50)}) {
-    return ElevatedButton.styleFrom(
-      backgroundColor: AppTheme.primaryColor,
-      foregroundColor: Colors.white,
-      fixedSize: size,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      textStyle: const TextStyle(color: Colors.white),
-    );
-  }
-
-  Future<void> consultarCep(String cep) async {
-    final url = 'https://viacep.com.br/ws/$cep/json/';
-    final response = await http.get(Uri.parse(url));
-
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> data = json.decode(response.body);
-
-      // Preenche os campos com os dados retornados
-      if (data['erro'] == null) {
-        cidadeController.text = data['localidade'];
-        estadoController.text = data['uf'];
-      } else {
-        // Caso o CEP seja inválido
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('CEP inválido')));
-      }
-    } else {
-      // Se a requisição falhar
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Falha ao consultar o CEP')));
     }
   }
 
@@ -248,7 +141,7 @@ class _UserRegistrationPageState extends State<UserRegistrationPage> {
               if (etapa == 1) ...[
                 TextFormField(
                   controller: nomeController,
-                  decoration: _inputDecoration('Nome *'),
+                  decoration: FormInputDecoration('Nome *'),
                   validator:
                       (value) => value!.isEmpty ? 'Informe seu nome' : null,
                 ),
@@ -257,7 +150,7 @@ class _UserRegistrationPageState extends State<UserRegistrationPage> {
 
                 TextFormField(
                   controller: telefoneController,
-                  decoration: _inputDecoration('Telefone *'),
+                  decoration: FormInputDecoration('Telefone *'),
                   keyboardType: TextInputType.phone,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -275,7 +168,7 @@ class _UserRegistrationPageState extends State<UserRegistrationPage> {
 
                 TextFormField(
                   controller: instagramController,
-                  decoration: _inputDecoration('Instagram'),
+                  decoration: FormInputDecoration('Instagram'),
                   keyboardType: TextInputType.twitter,
                 ),
 
@@ -283,7 +176,7 @@ class _UserRegistrationPageState extends State<UserRegistrationPage> {
 
                 TextFormField(
                   controller: emailController,
-                  decoration: _inputDecoration('Email *'),
+                  decoration: FormInputDecoration('Email *'),
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -304,17 +197,31 @@ class _UserRegistrationPageState extends State<UserRegistrationPage> {
 
                 TextFormField(
                   controller: senhaController,
-                  decoration: _inputDecoration('Senha *'),
+                  obscureText: obscurePassword,
+                  decoration: FormInputDecorationPassword(
+                    'Senha *',
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        obscurePassword
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                        color: AppTheme.primaryColor,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          obscurePassword = !obscurePassword;
+                        });
+                      },
+                    ),
+                  ),
                   keyboardType: TextInputType.visiblePassword,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Informe sua senha';
                     }
-
                     if (value.length < 6) {
                       return 'A senha deve ter no mínimo 6 caracteres';
                     }
-
                     return null;
                   },
                 ),
@@ -340,14 +247,18 @@ class _UserRegistrationPageState extends State<UserRegistrationPage> {
               if (etapa == 2) ...[
                 TextFormField(
                   controller: cepController,
-                  decoration: _inputDecoration('CEP *'),
+                  decoration: FormInputDecoration('CEP *'),
                   keyboardType: TextInputType.number,
-                  maxLength: 9, // Defina o comprimento do CEP como 9
+                  maxLength: 9,
                   onChanged: (cep) {
-                    // Remover caracteres não numéricos (como o hífen)
                     String cepFormatado = cep.replaceAll(RegExp(r'\D'), '');
                     if (cepFormatado.length == 8) {
-                      consultarCep(cepFormatado);
+                      consultarCep(
+                        cep: cepFormatado,
+                        cidadeController: cidadeController,
+                        estadoController: estadoController,
+                        context: context,
+                      );
                     }
                   },
                   validator: (value) {
@@ -365,7 +276,7 @@ class _UserRegistrationPageState extends State<UserRegistrationPage> {
 
                 TextFormField(
                   controller: cidadeController,
-                  decoration: _inputDecoration('Cidade *'),
+                  decoration: FormInputDecoration('Cidade *'),
                   keyboardType: TextInputType.text,
                   validator:
                       (value) => value!.isEmpty ? 'Informe sua cidade' : null,
@@ -375,7 +286,7 @@ class _UserRegistrationPageState extends State<UserRegistrationPage> {
 
                 TextFormField(
                   controller: estadoController,
-                  decoration: _inputDecoration('Estado *'),
+                  decoration: FormInputDecoration('Estado *'),
                   keyboardType: TextInputType.text,
                   validator:
                       (value) => value!.isEmpty ? 'Informe seu estado' : null,
