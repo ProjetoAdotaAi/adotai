@@ -35,35 +35,21 @@ class _PetRegistrationFormState extends State<PetRegistrationForm> {
 
   List<ImageProvider> petPhotos = [];
 
-  Map<String, dynamic> toAnimalMap({required String usuarioId}) {
-    return {
-      'nome': nameController.text.trim(),
-      'idade': _idadeToInt(idade),
-      'disponibilidade': true,
-      'sexo': sexo,
-      'porte': porte,
-      'especie': especie,
-      'castrado': castrado,
-      'vacinado': vacinado,
-      'vermifugado': desverminado,
-      'descricao': aboutController.text.trim(),
-      'usuario_id': usuarioId,
-      // Fotos não estão no modelo, mas poderiam ser tratadas separadamente
-    };
-  }
-
-  int? _idadeToInt(String? idade) {
-    switch (idade) {
-      case 'Filhote':
-        return 0;
-      case 'Adulto':
-        return 1;
-      case 'Idoso':
-        return 2;
-      default:
-        return null;
-    }
-  }
+Map<String, dynamic> toAnimalMap({required String usuarioId}) {
+  return {
+    'nome': nameController.text.trim(),
+    'idade': idade, 
+    'disponibilidade': true,
+    'sexo': sexo,
+    'porte': porte,
+    'especie': especie,
+    'castrado': castrado,
+    'vacinado': vacinado,
+    'vermifugado': desverminado,
+    'descricao': aboutController.text.trim(),
+    'usuario_id': usuarioId,
+  };
+}
 
   @override
   Widget build(BuildContext context) {
