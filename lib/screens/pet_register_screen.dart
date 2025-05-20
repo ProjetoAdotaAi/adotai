@@ -152,11 +152,10 @@ class _PetRegistrationFormState extends State<PetRegistrationForm> {
           ),
           const SizedBox(height: 16),
           const SizedBox(height: 16),
-          Text('Sexo'),
-          SingleSelectButtonWidget(
+          SingleSelectToggle(
             selectedOption: sexo,
             options: ['Macho', 'Fêmea'],
-            onSelectionChanged: (val) => setState(() => sexo = val),
+            onSelectionChanged: (val) => setState(() => sexo = val), label: 'Sexo',
           ),
           const SizedBox(height: 16),
           Text('Saúde'),

@@ -51,14 +51,15 @@ class _FilterButtonWidgetState extends State<FilterButtonWidget> {
   }
 }
 
-
-class SingleSelectButtonWidget extends StatelessWidget {
+class SingleSelectToggle extends StatelessWidget {
+  final String label;
   final String? selectedOption;
   final List<String> options;
   final ValueChanged<String> onSelectionChanged;
 
-  const SingleSelectButtonWidget({
+  const SingleSelectToggle({
     Key? key,
+    required this.label,
     required this.selectedOption,
     required this.options,
     required this.onSelectionChanged,
@@ -66,23 +67,29 @@ class SingleSelectButtonWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      spacing: 8,
-      children: options.map((option) {
-        bool isSelected = selectedOption == option;
-        return ElevatedButton(
-          onPressed: () => onSelectionChanged(option),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: isSelected ? AppTheme.primaryColor : AppTheme.cinzaClaro,
-            foregroundColor: isSelected ? Colors.white : Colors.black,
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(child: Text(label)),
+          Wrap(
+            spacing: 8,
+            children: options.map((option) {
+              final isSelected = selectedOption == option;
+              return ElevatedButton(
+                onPressed: () => onSelectionChanged(option),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isSelected ? AppTheme.primaryColor : AppTheme.cinzaClaro,
+                  foregroundColor: isSelected ? Colors.white : Colors.black,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                ),
+                child: Text(option),
+              );
+            }).toList(),
           ),
-          child: Text(option),
-        );
-      }).toList(),
+        ],
+      ),
     );
   }
 }
@@ -105,6 +112,7 @@ class YesNoToggle extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(child: Text(label)),
           ElevatedButton(
