@@ -1,3 +1,4 @@
+import 'package:adotai/screens/pet_register_screen.dart';
 import 'package:adotai/widgets/pet/user_pet_card.dart';
 import 'package:flutter/material.dart';
 import '../apiService/api_service.dart';
@@ -30,7 +31,8 @@ class _UserPetListState extends State<UserPetList> {
              children: [
                    ElevatedButton.icon(
                       onPressed: () {
-                        Navigator.pushNamed(context, '/add-pet');
+                        Navigator.push(
+                          context, MaterialPageRoute(builder: (_) => PetRegistrationScreen()));
                       },
                       icon: const Icon(Icons.add, size: 30),
                       label: const Text('  Adicionar Pet  '),
