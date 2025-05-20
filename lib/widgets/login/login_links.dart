@@ -1,4 +1,5 @@
-import 'package:adotai/screens/singUpScreen.dart';
+import 'package:adotai/screens/forgot_password_screen.dart';
+import 'package:adotai/screens/sing_up_screen.dart';
 import 'package:flutter/material.dart';
 
 class SingInEmailLink extends StatelessWidget {
@@ -8,7 +9,7 @@ class SingInEmailLink extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        debugPrint('Cadastre-se como Cliente');
+        debugPrint('Cadastre-se com E-mail');
         Navigator.push(context, 
         MaterialPageRoute(builder: (context) => UserRegistrationPage()));
       },
@@ -23,17 +24,19 @@ class SingInEmailLink extends StatelessWidget {
   }
 }
 
-class SingInOngLink extends StatelessWidget {
-  const SingInOngLink({super.key});
+class ForgotPasswordLink extends StatelessWidget {
+  const ForgotPasswordLink({super.key});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        debugPrint('Cadastre-se como Protetor/ONG');
+        debugPrint('Recuperar senha');
+        Navigator.push(context, 
+        MaterialPageRoute(builder: (context) => ForgotPasswordScreen()));
       },
       child: const Text(
-        'Protetor/ONG',
+        'Recuperar senha',
         style: TextStyle(
           color: Colors.orange,
           fontSize: 14,
@@ -42,3 +45,5 @@ class SingInOngLink extends StatelessWidget {
     );
   }
 }
+
+

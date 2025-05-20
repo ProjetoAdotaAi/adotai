@@ -1,11 +1,13 @@
 import 'dart:async';
+import 'package:adotai/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import '../screens/login_screen.dart';
 import '../theme/app_theme.dart';
 import '../services/permission_service.dart';
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
+  final bool fromLogin;
+  const SplashScreen({super.key, this.fromLogin = false});
 
   @override
   SplashScreenState createState() => SplashScreenState();
@@ -23,9 +25,25 @@ class SplashScreenState extends State<SplashScreen> {
     });
   }
 
-  Future<void> _initialize() async {
+  void navigateToHome() {
+    if (mounted) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+      );
+    }
+  }
 
-    bool locationPermissionGranted = await PermissionService.requestLocationPermission();
+  Future<void> _initialize() async {
+    if (widget.fromLogin) {
+      // Mostra splash por 2 segundos antes de ir pra HomeScreen
+      await Future.delayed(const Duration(seconds: 2));
+      navigateToHome();
+      return;
+    }
+
+    bool locationPermissionGranted =
+        await PermissionService.requestLocationPermission();
     Timer(Duration(seconds: 5), () {
       if (!_isPermissionChecked) {
         _navigateToLogin();
@@ -60,9 +78,7 @@ class SplashScreenState extends State<SplashScreen> {
 
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppTheme.primaryGradient,
-        ),
+        decoration: const BoxDecoration(gradient: AppTheme.primaryGradient),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -74,48 +90,45 @@ class SplashScreenState extends State<SplashScreen> {
               const SizedBox(height: 30),
               hasDenied
                   ? Column(
-                      children: [
-                        Text(
-                          'Permissão negada para: $_deniedPermission',
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
+                    children: [
+                      Text(
+                        'Permissão negada para: $_deniedPermission',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
                         ),
-                        const SizedBox(height: 20),
-                        OutlinedButton(
-                          onPressed: () async {
-                            setState(() {
-                              _deniedPermission = '';
-                            });
-                            await _initialize();
-                          },
-                          style: OutlinedButton.styleFrom(
-                            side: const BorderSide(
-                              color: Colors.white,
-                              width: 2,
-                            ),
-                            padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                          ),
-                          child: const Text(
-                            'Tentar Novamente',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
-                      ],
-                    )
-                  : const SizedBox(
-                      width: 150,
-                      child: LinearProgressIndicator(
-                        color: Colors.white,
-                        backgroundColor: Colors.white54,
                       ),
+                      const SizedBox(height: 20),
+                      OutlinedButton(
+                        onPressed: () async {
+                          setState(() {
+                            _deniedPermission = '';
+                          });
+                          await _initialize();
+                        },
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: Colors.white, width: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 50,
+                            vertical: 15,
+                          ),
+                        ),
+                        child: const Text(
+                          'Tentar Novamente',
+                          style: TextStyle(color: Colors.white, fontSize: 16),
+                        ),
+                      ),
+                    ],
+                  )
+                  : const SizedBox(
+                    width: 150,
+                    child: LinearProgressIndicator(
+                      color: Colors.white,
+                      backgroundColor: Colors.white54,
                     ),
+                  ),
             ],
           ),
         ),
