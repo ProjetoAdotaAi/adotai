@@ -1,6 +1,8 @@
 import 'package:adotai/widgets/home/appbar.dart';
 import 'package:adotai/widgets/preferences/filter_options.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io'; // Também necessário para trabalhar com File
 
 class PetRegistrationScreen extends StatelessWidget {
   const PetRegistrationScreen({super.key});
@@ -35,41 +37,43 @@ class _PetRegistrationFormState extends State<PetRegistrationForm> {
 
   List<ImageProvider> petPhotos = [];
 
-Map<String, dynamic> toAnimalMap({required String usuarioId}) {
-  return {
-    'nome': nameController.text.trim(),
-    'idade': idade, 
-    'disponibilidade': true,
-    'sexo': sexo,
-    'porte': porte,
-    'especie': especie,
-    'castrado': castrado,
-    'vacinado': vacinado,
-    'vermifugado': desverminado,
-    'descricao': aboutController.text.trim(),
-    'usuario_id': usuarioId,
-  };
-}
+  Map<String, dynamic> toAnimalMap({required String usuarioId}) {
+    return {
+      'nome': nameController.text.trim(),
+      'idade': idade,
+      'disponibilidade': true,
+      'sexo': sexo,
+      'porte': porte,
+      'especie': especie,
+      'castrado': castrado,
+      'vacinado': vacinado,
+      'vermifugado': desverminado,
+      'descricao': aboutController.text.trim(),
+      'usuario_id': usuarioId,
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Wrap(
+        children: [             
+           Wrap(
             spacing: 8,
             children: [
               ...petPhotos.map(
                 (photo) => Stack(
                   alignment: Alignment.topRight,
                   children: [
-                    Image(
-                      image: photo,
-                      width: 100,
-                      height: 100,
-                      fit: BoxFit.cover,
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image(
+                        image: photo,
+                        width: 100,
+                        height: 100,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                     IconButton(
                       icon: const Icon(Icons.close, color: Colors.red),
@@ -82,12 +86,22 @@ Map<String, dynamic> toAnimalMap({required String usuarioId}) {
                   ],
                 ),
               ),
-              ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => PetRegistrationScreen()),
-                  );
+              
+            ],
+          ),
+          const SizedBox(height: 16), 
+          ElevatedButton.icon(
+                onPressed: () async {
+                  final ImagePicker picker = ImagePicker();
+                  final List<XFile>? pickedFiles =
+                      await picker.pickMultiImage();
+                  if (pickedFiles != null && pickedFiles.isNotEmpty) {
+                    setState(() {
+                      petPhotos.addAll(
+                        pickedFiles.map((file) => FileImage(File(file.path))),
+                      );
+                    });
+                  }
                 },
                 icon: const Icon(Icons.add, size: 30),
                 label: const Text('Adicionar Fotos do Pet'),
@@ -104,8 +118,6 @@ Map<String, dynamic> toAnimalMap({required String usuarioId}) {
                   ),
                 ),
               ),
-            ],
-          ),
           const SizedBox(height: 16),
           TextField(
             controller: nameController,
@@ -167,7 +179,7 @@ Map<String, dynamic> toAnimalMap({required String usuarioId}) {
             onChanged: (val) => setState(() => desverminado = val),
           ),
           const SizedBox(height: 16),
-            TextField(
+          TextField(
             controller: aboutController,
             maxLength: 500,
             maxLines: null,
@@ -176,9 +188,10 @@ Map<String, dynamic> toAnimalMap({required String usuarioId}) {
               border: OutlineInputBorder(),
               hintText: 'Descreva o animal',
               hintStyle: TextStyle(color: Colors.grey),
-              floatingLabelBehavior: FloatingLabelBehavior.always, // Mantém o label sempre visível
+              floatingLabelBehavior:
+                  FloatingLabelBehavior.always, // Mantém o label sempre visível
             ),
-            ),
+          ),
           const SizedBox(height: 16),
           Row(
             children: [
@@ -195,7 +208,6 @@ Map<String, dynamic> toAnimalMap({required String usuarioId}) {
                     final animalData = toAnimalMap(usuarioId: 'ID_DO_USUARIO');
                     print(
                       animalData,
-
                     ); // Chamada da API para salvar os dados do animal
                   },
                   child: const Text('Salvar dados'),

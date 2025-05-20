@@ -20,6 +20,7 @@ dependencies:
   flutter_masked_text2: ^0.9.1
   http: ^0.13.3
   flutter_launcher_icons: ^0.14.3
+  image_picker: 1.0.7
 
   
 flutter_launcher_icons:
