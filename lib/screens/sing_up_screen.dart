@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:adotai/services/via_cep_api.dart';
 import 'package:adotai/theme/app_theme.dart';
+import 'package:adotai/utils/validators.dart';
 import 'package:adotai/widgets/home/appbar.dart';
 import 'package:adotai/widgets/singup/form_button_style.dart';
 import 'package:adotai/widgets/singup/input_decoration.dart';
@@ -9,6 +10,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:http/http.dart' as http;
+import 'package:adotai/models/user_model.dart';
 
 class UserRegistrationPage extends StatefulWidget {
   @override
@@ -19,47 +21,40 @@ class _UserRegistrationPageState extends State<UserRegistrationPage> {
   bool obscurePassword = true;
   final _formKey = GlobalKey<FormState>();
 
-  final nomeController = TextEditingController();
-  final telefoneController = MaskedTextController(mask: '(00) 00000-0000');
+  final nameController = TextEditingController();
+  final phoneController = MaskedTextController(mask: '(00) 00000-0000');
   final instagramController = TextEditingController();
   final emailController = TextEditingController();
-  final senhaController = TextEditingController();
+  final passwordController = TextEditingController();
   final cepController = MaskedTextController(mask: '00000-000');
-  final cidadeController = TextEditingController();
-  final estadoController = TextEditingController();
+  final cityController = TextEditingController();
+  final stateController = TextEditingController();
   bool? isONG;
 
-  // Etapas do formulário de cadastro
-  int etapa = 1;
+  // formSteps do formulário de cadastro
+  int _formStep = 1;
 
-  Future<void> _salvarCadastroNoBancoDeDados(
-    String userId,
-    String nome,
-    String telefone,
-    String instagram,
-    String email,
-    String senha,
-    String cep,
-    String cidade,
-    String estado,
-    bool isONG,
-  ) async {
+   @override
+  void dispose() {
+    nameController.dispose();
+    phoneController.dispose();
+    instagramController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    cepController.dispose();
+    cityController.dispose();
+    stateController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _registerUserInDatabase(UserModel user) async {
     //10.0.2.2 porta utilizada rodando o app por emulador
     final url = Uri.parse('http://10.0.2.2:4040/api/users');
 
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
-      body: json.encode({
-        'firebaseId': userId,
-        'name': nome,
-        'phone': telefone,
-        'instagram': instagram,
-        'email': email,
-        'password': senha,
-        'address': {'cep': cep, 'city': cidade, 'state': estado},
-        'isOng': isONG,
-      }),
+      body: json.encode(user.toJson()),
     );
 
     if (response.statusCode == 201) {
@@ -69,35 +64,38 @@ class _UserRegistrationPageState extends State<UserRegistrationPage> {
     }
   }
 
-  void _salvarCadastro() async {
+  void _registerUser() async {
     if (_formKey.currentState!.validate() && isONG != null) {
       try {
-        //Criando o usuário no Firebase Authentication
+      
         UserCredential userCredential = await FirebaseAuth.instance
             .createUserWithEmailAndPassword(
-              email: emailController.text,
-              password: senhaController.text,
+              email: emailController.text.trim(),
+              password: passwordController.text,
             );
-        // Pegando o UID do usuário
+ 
         String userId = userCredential.user!.uid;
 
-        await _salvarCadastroNoBancoDeDados(
-          userId,
-          nomeController.text,
-          telefoneController.text,
-          instagramController.text,
-          emailController.text,
-          senhaController.text,
-          cepController.text,
-          cidadeController.text,
-          estadoController.text,
-          isONG!,
+        final user = UserModel(
+          firebaseId: userId,
+          name: nameController.text,
+          phone: phoneController.text,
+          instagram: instagramController.text,
+          email: emailController.text,
+          password: passwordController.text,
+          cep: cepController.text,
+          city: cityController.text,
+          state: stateController.text,
+          isOng: isONG!,
         );
+
+        await _registerUserInDatabase(user);
 
         showSuccessDialog(
           context,
           "Seu cadastro foi efetuado com sucesso! Prossiga para a tela de login.",
         );
+        
       } on FirebaseAuthException catch (e) {
         String mensagemErro;
         if (e.code == 'email-already-in-use') {
@@ -138,10 +136,10 @@ class _UserRegistrationPageState extends State<UserRegistrationPage> {
               ),
               SizedBox(height: 25),
 
-              if (etapa == 1) ...[
+              if (_formStep == 1) ...[
                 TextFormField(
-                  controller: nomeController,
-                  decoration: FormInputDecoration('Nome *'),
+                  controller: nameController,
+                  decoration: customInputDecoration('Nome *'),
                   validator:
                       (value) => value!.isEmpty ? 'Informe seu nome' : null,
                 ),
@@ -149,26 +147,17 @@ class _UserRegistrationPageState extends State<UserRegistrationPage> {
                 SizedBox(height: 20),
 
                 TextFormField(
-                  controller: telefoneController,
-                  decoration: FormInputDecoration('Telefone *'),
+                  controller: phoneController,
+                  decoration: customInputDecoration('Telefone *'),
                   keyboardType: TextInputType.phone,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Informe seu telefone';
-                    }
-                    // Validar se o valor tem o comprimento certo (15 caracteres com a máscara)
-                    if (value.length != 15 && value.length != 14) {
-                      return 'Telefone inválido';
-                    }
-                    return null; // Telefone válido
-                  },
+                  validator: phoneValidator,
                 ),
 
                 SizedBox(height: 20),
 
                 TextFormField(
                   controller: instagramController,
-                  decoration: FormInputDecoration('Instagram'),
+                  decoration: customInputDecoration('Instagram'),
                   keyboardType: TextInputType.twitter,
                 ),
 
@@ -176,31 +165,21 @@ class _UserRegistrationPageState extends State<UserRegistrationPage> {
 
                 TextFormField(
                   controller: emailController,
-                  decoration: FormInputDecoration('Email *'),
+                  decoration: customInputDecoration('Email *'),
                   keyboardType: TextInputType.emailAddress,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Informe seu email';
-                    }
-                    // Regex para validar formato de email
-                    String pattern =
-                        r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$';
-                    RegExp regExp = RegExp(pattern);
-                    if (!regExp.hasMatch(value)) {
-                      return 'Email inválido';
-                    }
-                    return null; // Email válido
-                  },
+                  validator: emailValidator,
                 ),
 
                 SizedBox(height: 20),
 
                 TextFormField(
-                  controller: senhaController,
+                  controller: passwordController,
                   obscureText: obscurePassword,
-                  decoration: FormInputDecorationPassword(
+                  decoration: customInputDecoration(
                     'Senha *',
                     suffixIcon: IconButton(
+                      tooltip:
+                          obscurePassword ? 'Mostrar senha' : 'Ocultar senha',
                       icon: Icon(
                         obscurePassword
                             ? Icons.visibility_off
@@ -215,15 +194,7 @@ class _UserRegistrationPageState extends State<UserRegistrationPage> {
                     ),
                   ),
                   keyboardType: TextInputType.visiblePassword,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Informe sua senha';
-                    }
-                    if (value.length < 6) {
-                      return 'A senha deve ter no mínimo 6 caracteres';
-                    }
-                    return null;
-                  },
+                  validator: passwordValidator,
                 ),
 
                 SizedBox(height: 50),
@@ -235,7 +206,7 @@ class _UserRegistrationPageState extends State<UserRegistrationPage> {
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
                         setState(() {
-                          etapa = 2;
+                          _formStep = 2;
                         });
                       }
                     },
@@ -244,39 +215,31 @@ class _UserRegistrationPageState extends State<UserRegistrationPage> {
                 ),
               ],
 
-              if (etapa == 2) ...[
+              if (_formStep == 2) ...[
                 TextFormField(
                   controller: cepController,
-                  decoration: FormInputDecoration('CEP *'),
+                  decoration: customInputDecoration('CEP *'),
                   keyboardType: TextInputType.number,
                   maxLength: 9,
                   onChanged: (cep) {
                     String cepFormatado = cep.replaceAll(RegExp(r'\D'), '');
                     if (cepFormatado.length == 8) {
-                      consultarCep(
+                      getAddressFromCep(
                         cep: cepFormatado,
-                        cidadeController: cidadeController,
-                        estadoController: estadoController,
+                        cityController: cityController,
+                        stateController: stateController,
                         context: context,
                       );
                     }
                   },
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Informe seu CEP';
-                    }
-                    if (value.length != 9) {
-                      return 'CEP inválido';
-                    }
-                    return null;
-                  },
+                  validator: cepValidator,
                 ),
 
                 SizedBox(height: 20),
 
                 TextFormField(
-                  controller: cidadeController,
-                  decoration: FormInputDecoration('Cidade *'),
+                  controller: cityController,
+                  decoration: customInputDecoration('Cidade *'),
                   keyboardType: TextInputType.text,
                   validator:
                       (value) => value!.isEmpty ? 'Informe sua cidade' : null,
@@ -285,8 +248,8 @@ class _UserRegistrationPageState extends State<UserRegistrationPage> {
                 SizedBox(height: 20),
 
                 TextFormField(
-                  controller: estadoController,
-                  decoration: FormInputDecoration('Estado *'),
+                  controller: stateController,
+                  decoration: customInputDecoration('Estado *'),
                   keyboardType: TextInputType.text,
                   validator:
                       (value) => value!.isEmpty ? 'Informe seu estado' : null,
@@ -300,7 +263,7 @@ class _UserRegistrationPageState extends State<UserRegistrationPage> {
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
                         setState(() {
-                          etapa = 3;
+                          _formStep = 3;
                         });
                       }
                     },
@@ -310,7 +273,7 @@ class _UserRegistrationPageState extends State<UserRegistrationPage> {
               ],
 
               SizedBox(height: 30),
-              if (etapa == 3) ...[
+              if (_formStep == 3) ...[
                 Padding(
                   padding: const EdgeInsets.only(top: 16.0),
                   child: Center(
@@ -353,6 +316,7 @@ class _UserRegistrationPageState extends State<UserRegistrationPage> {
                           style: TextStyle(
                             color: isONG == false ? Colors.white : Colors.black,
                             fontWeight: FontWeight.w500,
+                            fontSize: 18,
                           ),
                         ),
                       ),
@@ -378,7 +342,7 @@ class _UserRegistrationPageState extends State<UserRegistrationPage> {
                             isONG == true
                                 ? AppTheme.primaryColor
                                 : Colors.grey[200],
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(15),
                         border: Border.all(
                           color:
                               isONG == true
@@ -392,6 +356,7 @@ class _UserRegistrationPageState extends State<UserRegistrationPage> {
                           style: TextStyle(
                             color: isONG == true ? Colors.white : Colors.black,
                             fontWeight: FontWeight.w500,
+                            fontSize: 18,
                           ),
                         ),
                       ),
@@ -403,7 +368,7 @@ class _UserRegistrationPageState extends State<UserRegistrationPage> {
                 Center(
                   child: ElevatedButton(
                     style: formButtonStyle(),
-                    onPressed: isONG == null ? null : _salvarCadastro,
+                    onPressed: isONG == null ? null : _registerUser,
                     child: Text('Finalizar Cadastro'),
                   ),
                 ),

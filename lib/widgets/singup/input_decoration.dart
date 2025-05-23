@@ -1,40 +1,19 @@
-import 'package:adotai/theme/app_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:adotai/theme/app_theme.dart';
 
-InputDecoration FormInputDecoration(String labelText) {
-    return InputDecoration(
-      labelText: labelText,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(20),
-        borderSide: BorderSide(color: Colors.black),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(20),
-        borderSide: BorderSide(color: Colors.black),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(20),
-        borderSide: BorderSide(color: AppTheme.primaryColor),
-      ),
-    );
-  }
+InputBorder _inputBorder(Color color) {
+  return OutlineInputBorder(
+    borderRadius: BorderRadius.circular(12),
+    borderSide: BorderSide(color: color),
+  );
+}
 
-
- InputDecoration FormInputDecorationPassword(String labelText, {Widget? suffixIcon}) {
+InputDecoration customInputDecoration(String labelText, {Widget? suffixIcon}) {
   return InputDecoration(
     labelText: labelText,
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(20),
-      borderSide: const BorderSide(color: Colors.black),
-    ),
-    enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(20),
-      borderSide: const BorderSide(color: Colors.black),
-    ),
-    focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(20),
-      borderSide: BorderSide(color: AppTheme.primaryColor),
-    ),
+    border: _inputBorder(Colors.black),
+    enabledBorder: _inputBorder(Colors.black),
+    focusedBorder: _inputBorder(AppTheme.primaryColor),
     suffixIcon: suffixIcon,
   );
 }

@@ -137,7 +137,7 @@ class _LoginBody extends StatelessWidget {
                           backgroundColor: AppTheme.primaryColor,
                           fixedSize: const Size(220, 50),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
+                            borderRadius: BorderRadius.circular(15),
                           ),
                         ),
                         child: const Text(
@@ -156,7 +156,7 @@ class _LoginBody extends StatelessWidget {
                           ),
                           fixedSize: const Size(220, 50),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
+                            borderRadius: BorderRadius.circular(15),
                           ),
                         ),
                         child: GestureDetector(

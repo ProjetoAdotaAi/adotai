@@ -5,6 +5,7 @@ import 'package:adotai/widgets/singup/form_button_style.dart';
 import 'package:adotai/widgets/singup/input_decoration.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:adotai/utils/validators.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   @override
@@ -68,21 +69,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   SizedBox(height: 30),
                   TextFormField(
                     controller: _emailController,
-                    decoration: FormInputDecoration("Email "),
+                    decoration: customInputDecoration("Email "),
                     keyboardType: TextInputType.emailAddress,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Informe seu email';
-                      }
-                      // Regex para validar formato de email
-                      String pattern =
-                          r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$';
-                      RegExp regExp = RegExp(pattern);
-                      if (!regExp.hasMatch(value)) {
-                        return 'Email inválido';
-                      }
-                      return null; // Email válido
-                    },
+                    validator: emailValidator,
                   ),
                   SizedBox(height: 60),
                   SizedBox(

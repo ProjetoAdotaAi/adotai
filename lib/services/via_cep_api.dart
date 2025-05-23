@@ -3,10 +3,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-Future<void> consultarCep({
+Future<void> getAddressFromCep({
   required String cep,
-  required TextEditingController cidadeController,
-  required TextEditingController estadoController,
+  required TextEditingController cityController,
+  required TextEditingController stateController,
   required BuildContext context,
 }) async {
   final url = 'https://viacep.com.br/ws/$cep/json/';
@@ -16,8 +16,8 @@ Future<void> consultarCep({
     final Map<String, dynamic> data = json.decode(response.body);
 
     if (data['erro'] == null) {
-      cidadeController.text = data['localidade'];
-      estadoController.text = data['uf'];
+      cityController.text = data['localidade'];
+      stateController.text = data['uf'];
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('CEP inválido')),
