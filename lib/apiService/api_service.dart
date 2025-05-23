@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../model/pet_model.dart';
+import '../models/pet_model.dart';
 
 class ApiService {
   static Future<List<Pet>> fetchFavorites() async {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../apiService/api_service.dart';
-import '../../model/pet_model.dart';
+import '../../models/pet_model.dart';
 import 'favorite_pet_card.dart';
 
 class FavoritePets extends StatefulWidget {
