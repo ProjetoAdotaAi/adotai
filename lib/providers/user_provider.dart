@@ -7,6 +7,12 @@ import '../models/adress_model.dart';
 class UserProvider with ChangeNotifier {
   final UserService _userService = UserService();
 
+  UserModel? currentUser;
+  bool isLoading = false;
+  String? errorMessage;
+
+  int? get userId => currentUser?.id;
+
   Future<String?> registerUser({
     required String name,
     required String phone,
@@ -53,5 +59,77 @@ class UserProvider with ChangeNotifier {
       if (e.code == 'weak-password') return 'A senha precisa ter pelo menos 6 caracteres.';
       return 'Erro: ${e.message}';
     }
+  }
+
+  Future<void> loadUser(int id) async {
+    isLoading = true;
+    errorMessage = null;
+    notifyListeners();
+
+    try {
+      final user = await _userService.getUserById(id);
+      currentUser = user;
+    } catch (e) {
+      errorMessage = 'Erro ao carregar usuário';
+    }
+
+    isLoading = false;
+    notifyListeners();
+  }
+
+  Future<String?> updateUser({
+    required int id,
+    String? name,
+    String? email,
+    String? password,
+  }) async {
+    isLoading = true;
+    notifyListeners();
+
+    final error = await _userService.updateUser(id, name: name, email: email, password: password);
+
+    if (error == null) {
+      await loadUser(id);
+    } else {
+      errorMessage = error;
+    }
+
+    isLoading = false;
+    notifyListeners();
+    return error;
+  }
+
+  Future<String?> deleteUser(int id) async {
+    isLoading = true;
+    notifyListeners();
+
+    final error = await _userService.deleteUser(id);
+
+    if (error != null) {
+      errorMessage = error;
+    }
+
+    isLoading = false;
+    notifyListeners();
+
+    return error;
+  }
+
+  Future<String?> updateProfilePicture(int id, String base64Image) async {
+    isLoading = true;
+    notifyListeners();
+
+    final error = await _userService.updateProfilePicture(id, base64Image);
+
+    if (error == null) {
+      await loadUser(id);
+    } else {
+      errorMessage = error;
+    }
+
+    isLoading = false;
+    notifyListeners();
+
+    return error;
   }
 }
