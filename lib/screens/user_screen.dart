@@ -1,3 +1,4 @@
+import 'package:adotai/screens/change_password_screen.dart';
 import 'package:adotai/screens/favorite_pets_screen.dart';
 import 'package:adotai/screens/user_pet_list_screen.dart';
 import 'package:flutter/material.dart';
@@ -90,6 +91,10 @@ class UserScreen extends StatelessWidget {
                 icon: Icons.lock,
                 label: 'Alterar Senha',
                 onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => ChangePasswordScreen()),
+                  );
                 },
               ),
               const SizedBox(height: 12),

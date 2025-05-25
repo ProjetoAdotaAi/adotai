@@ -1,8 +1,8 @@
 import 'package:adotai/screens/pet_register_screen.dart';
 import 'package:adotai/widgets/pet/user_pet_card.dart';
 import 'package:flutter/material.dart';
-import '../apiService/api_service.dart';
 import '../models/pet_model.dart';
+import '../services/pet_service.dart';
 import '../widgets/home/appbar.dart';
 
 
@@ -67,8 +67,8 @@ class _UserPetListState extends State<UserPetList> {
                 ),
            const SizedBox(height: 16),
            Expanded(
-              child: FutureBuilder<List<Pet>>(
-                future: ApiService.fetchUserPets(),
+              child: FutureBuilder<List<PetModel>>(
+                future: PetService.fetchUserPets(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());

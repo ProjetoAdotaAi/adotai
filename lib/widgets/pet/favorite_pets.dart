@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../apiService/api_service.dart';
 import '../../models/pet_model.dart';
+import '../../services/pet_service.dart';
 import 'favorite_pet_card.dart';
 
 class FavoritePets extends StatefulWidget {
@@ -15,21 +15,26 @@ class _FavoritePetsState extends State<FavoritePets> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Meus Favoritos', style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 16),
-           Expanded(
-              child: FutureBuilder<List<Pet>>(
-                future: ApiService.fetchFavorites(),
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Meus Favoritos',
+              style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: FutureBuilder<List<PetModel>>(
+                future: PetService.fetchFavorites(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
+                  }
+                  if (snapshot.hasError) {
                     return Center(child: Text('Erro: ${snapshot.error}'));
-                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  }
+                  if (snapshot.data == null || snapshot.data!.isEmpty) {
                     return const Center(child: Text('Nenhum favorito encontrado.'));
                   }
 
@@ -43,9 +48,7 @@ class _FavoritePetsState extends State<FavoritePets> {
                       crossAxisSpacing: 12,
                       childAspectRatio: 1,
                     ),
-                    itemBuilder: (context, index) {
-                      return FavoritePetCard(pet: pets[index]);
-                    },
+                    itemBuilder: (context, index) => FavoritePetCard(pet: pets[index]),
                   );
                 },
               ),

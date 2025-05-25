@@ -11,7 +11,7 @@ class SingInEmailLink extends StatelessWidget {
       onTap: () {
         debugPrint('Cadastre-se com E-mail');
         Navigator.push(context, 
-        MaterialPageRoute(builder: (context) => UserRegistrationPage()));
+        MaterialPageRoute(builder: (context) => SingUpScreen()));
       },
       child: const Text(
         'E-mail',
