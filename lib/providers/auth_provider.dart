@@ -9,14 +9,15 @@ class AuthProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
 
-  AuthProvider({required this.authService});
+  AuthProvider({AuthService? authService})
+      : authService = authService ?? AuthService();
 
   String? get token => _token;
   Map<String, dynamic>? get user => _user;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
-  Future<void> loginWithEmail(String email, String password) async {
+  Future<void> login(String email, String password) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
