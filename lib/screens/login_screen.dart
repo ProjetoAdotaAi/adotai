@@ -1,10 +1,10 @@
-import 'package:adotai/screens/splash_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../theme/app_theme.dart';
 import '../widgets/login/login_text_field.dart';
 import '../widgets/login/login_links.dart';
-import '../theme/app_theme.dart';
+import 'splash_screen.dart';
+import '../providers/auth_provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -17,17 +17,10 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   bool obscurePassword = true;
-  bool isLoading = false;
 
   void togglePasswordVisibility() {
     setState(() {
       obscurePassword = !obscurePassword;
-    });
-  }
-
-  void setLoading(bool value) {
-    setState(() {
-      isLoading = value;
     });
   }
 
@@ -40,219 +33,171 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: _LoginBody());
-  }
-}
+    final authProvider = context.watch<AuthProvider>();
 
-class _LoginBody extends StatelessWidget {
-  const _LoginBody();
-
-  @override
-  Widget build(BuildContext context) {
-    final state = context.findAncestorStateOfType<_LoginScreenState>()!;
-    return Container(
-      decoration: const BoxDecoration(gradient: AppTheme.primaryGradient),
-      width: double.infinity,
-      height: double.infinity,
-      child: Center(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const SizedBox(height: 30),
-                Container(
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.all(Radius.circular(12)),
-                  ),
-                  padding: const EdgeInsets.all(16),
-                  width: double.infinity,
-                  height: 650,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Image.asset(
-                        'assets/images/logo.png',
-                        width: 150,
-                        height: 150,
-                      ),
-                      Image.asset('assets/images/adotai.png'),
-                      const SizedBox(height: 20),
-                      LoginTextField(
-                        labelText: 'E-mail',
-                        hintText: 'Digite seu e-mail...',
-                        controller: state.emailController,
-                        keyboardType: TextInputType.emailAddress,
-                      ),
-                      const SizedBox(height: 20),
-                      LoginTextField(
-                        labelText: 'Senha',
-                        hintText: 'Digite sua senha...',
-                        controller: state.passwordController,
-                        keyboardType: TextInputType.visiblePassword,
-                        obscureText: state.obscurePassword,
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            state.obscurePassword
-                                ? Icons.visibility_off
-                                : Icons.visibility,
-                            color: AppTheme.primaryColor,
-                          ),
-                          onPressed: state.togglePasswordVisibility,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      ElevatedButton(
-                        onPressed: () async {
-                          final email = state.emailController.text;
-                          final password = state.passwordController.text;
-
-                          try {
-                            UserCredential userCredential = await FirebaseAuth
-                                .instance
-                                .signInWithEmailAndPassword(
-                                  email: email,
-                                  password: password,
-                                );
-
-                            if (userCredential.user != null) {
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder:
-                                      (context) =>
-                                          const SplashScreen(fromLogin: true),
-                                ),
-                              );
-                            }
-                          } catch (e) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text("Erro ao fazer login")),
-                            );
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.primaryColor,
-                          fixedSize: const Size(220, 50),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                        ),
-                        child: const Text(
-                          'Entrar',
-                          style: TextStyle(color: Colors.white, fontSize: 18),
-                        ),
-                      ),
-
-                      const SizedBox(height: 20),
-                      OutlinedButton(
-                        onPressed: () {},
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(
-                            color: Colors.orange,
-                            width: 2,
-                          ),
-                          fixedSize: const Size(220, 50),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                        ),
-                        child: GestureDetector(
-                          onTap: () async {
-                            bool isLogged = await login(context);
-                            if (isLogged) {
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder:
-                                      (context) =>
-                                          const SplashScreen(fromLogin: true),
-                                ),
-                              );
-                            }
-                          },
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Image.asset(
-                                'assets/images/google.png',
-                                width: 20,
-                                height: 20,
-                              ),
-                              const SizedBox(width: 10),
-                              const Text(
-                                'Entrar com Google',
-                                style: TextStyle(
-                                  color: Colors.orange,
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 30),
-                      const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Cadastre-se com ',
-                            style: TextStyle(color: Colors.grey, fontSize: 14),
-                          ),
-                          SingInEmailLink(),
-                        ],
-                      ),
-                      const SizedBox(height: 30),
-                      const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Esqueçeu sua senha? ',
-                            style: TextStyle(color: Colors.grey, fontSize: 14),
-                          ),
-                          ForgotPasswordLink(),
-                        ],
-                      ),
-                    ],
-                  ),
+    return Scaffold(
+      body: Container(
+        decoration: const BoxDecoration(gradient: AppTheme.primaryGradient),
+        width: double.infinity,
+        height: double.infinity,
+        child: Center(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.all(Radius.circular(12)),
                 ),
-              ],
+                padding: const EdgeInsets.all(16),
+                width: double.infinity,
+                height: 650,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Image.asset(
+                      'assets/images/logo.png',
+                      width: 150,
+                      height: 150,
+                    ),
+                    Image.asset('assets/images/adotai.png'),
+                    const SizedBox(height: 20),
+                    LoginTextField(
+                      labelText: 'E-mail',
+                      hintText: 'Digite seu e-mail...',
+                      controller: emailController,
+                      keyboardType: TextInputType.emailAddress,
+                    ),
+                    const SizedBox(height: 20),
+                    LoginTextField(
+                      labelText: 'Senha',
+                      hintText: 'Digite sua senha...',
+                      controller: passwordController,
+                      keyboardType: TextInputType.visiblePassword,
+                      obscureText: obscurePassword,
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          obscurePassword ? Icons.visibility_off : Icons.visibility,
+                          color: AppTheme.primaryColor,
+                        ),
+                        onPressed: togglePasswordVisibility,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: authProvider.isLoading
+                          ? null
+                          : () async {
+                              final email = emailController.text.trim();
+                              final password = passwordController.text.trim();
+
+                              await authProvider.loginWithEmail(email, password);
+
+                              if (authProvider.errorMessage != null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(authProvider.errorMessage!)),
+                                );
+                              } else if (authProvider.token != null) {
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const SplashScreen(fromLogin: true),
+                                  ),
+                                );
+                              }
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.primaryColor,
+                        fixedSize: const Size(220, 50),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                      ),
+                      child: authProvider.isLoading
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : const Text(
+                              'Entrar',
+                              style: TextStyle(color: Colors.white, fontSize: 18),
+                            ),
+                    ),
+                    const SizedBox(height: 20),
+                    OutlinedButton(
+                      onPressed: authProvider.isLoading
+                          ? null
+                          : () async {
+                              await authProvider.loginWithGoogle();
+
+                              if (authProvider.errorMessage != null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(authProvider.errorMessage!)),
+                                );
+                              } else if (authProvider.token != null) {
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const SplashScreen(fromLogin: true),
+                                  ),
+                                );
+                              }
+                            },
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(
+                          color: Colors.orange,
+                          width: 2,
+                        ),
+                        fixedSize: const Size(220, 50),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.asset(
+                            'assets/images/google.png',
+                            width: 20,
+                            height: 20,
+                          ),
+                          const SizedBox(width: 10),
+                          const Text(
+                            'Entrar com Google',
+                            style: TextStyle(
+                              color: Colors.orange,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 30),
+                    const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Cadastre-se com ',
+                          style: TextStyle(color: Colors.grey, fontSize: 14),
+                        ),
+                        SingInEmailLink(),
+                      ],
+                    ),
+                    const SizedBox(height: 30),
+                    const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Esqueçeu sua senha? ',
+                          style: TextStyle(color: Colors.grey, fontSize: 14),
+                        ),
+                        ForgotPasswordLink(),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         ),
       ),
     );
-  }
-
-  Future<bool> login(BuildContext context) async {
-    final state = context.findAncestorStateOfType<_LoginScreenState>()!;
-    state.setLoading(true);
-
-    try {
-      final user = await GoogleSignIn().signIn();
-      if (user == null) {
-        state.setLoading(false);
-        return false;
-      }
-
-      GoogleSignInAuthentication userAuth = await user.authentication;
-
-      var credential = GoogleAuthProvider.credential(
-        idToken: userAuth.idToken,
-        accessToken: userAuth.accessToken,
-      );
-
-      await FirebaseAuth.instance.signInWithCredential(credential);
-
-      return FirebaseAuth.instance.currentUser != null;
-    } catch (e) {
-      return false;
-    } finally {
-      final state = context.findAncestorStateOfType<_LoginScreenState>()!;
-      state.setLoading(false);
-    }
   }
 }

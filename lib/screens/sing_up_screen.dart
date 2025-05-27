@@ -76,7 +76,7 @@ class _SingUpScreenState extends State<SingUpScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(),
+      appBar: CustomAppBar(hasBackButton: true,),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
