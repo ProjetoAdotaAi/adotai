@@ -1,14 +1,13 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:google_sign_in/google_sign_in.dart';
+import '../utils/api.dart';
 
 class AuthService {
-  final String baseUrl;
-
-  AuthService({required this.baseUrl});
+  final Api api = Api();
 
   Future<Map<String, dynamic>> login(String email, String password) async {
-    final url = Uri.parse('$baseUrl/api/login');
+    final url = Uri.parse('${api.baseUrl}/api/login');
 
     final response = await http.post(
       url,
@@ -36,7 +35,7 @@ class AuthService {
     final email = googleUser.email;
     final name = googleUser.displayName ?? '';
 
-    final url = Uri.parse('$baseUrl/api/login/google');
+    final url = Uri.parse('${api.baseUrl}/api/login/google');
 
     final response = await http.post(
       url,
