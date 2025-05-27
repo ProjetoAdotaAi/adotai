@@ -21,6 +21,9 @@ dependencies:
   http: ^0.13.3
   flutter_launcher_icons: ^0.14.3
   image_picker: 1.0.7
+  provider: ^6.1.5
+  flutter_dotenv: ^5.2.1
+  geolocator: ^14.0.1
 
   
 flutter_launcher_icons:
@@ -39,6 +42,7 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
+    - .env
     - assets/images/logo.png
     - assets/images/google.png
     - assets/images/adotai.png

@@ -1,38 +1,64 @@
+import 'adress_model.dart';
+import 'pet_model.dart';
+
 class UserModel {
+  final int id;
   final String firebaseId;
   final String name;
   final String phone;
   final String instagram;
   final String email;
   final String password;
-  final String cep;
-  final String city;
-  final String state;
+  final AddressModel? address;
   final bool isOng;
+  final String? profilePicture;
+  final List<PetModel> pets;
 
   UserModel({
+    required this.id,
     required this.firebaseId,
     required this.name,
     required this.phone,
     required this.instagram,
     required this.email,
     required this.password,
-    required this.cep,
-    required this.city,
-    required this.state,
+    this.address,
     required this.isOng,
+    this.profilePicture,
+    required this.pets,
   });
+
+  factory UserModel.fromJson(Map<String, dynamic> json) {
+    return UserModel(
+      id: json['id'],
+      firebaseId: json['firebaseId'],
+      name: json['name'],
+      phone: json['phone'],
+      instagram: json['instagram'],
+      email: json['email'],
+      password: json['password'],
+      address: json['address'] != null ? AddressModel.fromJson(json['address']) : null,
+      isOng: json['isOng'],
+      profilePicture: json['profilePicture'],
+      pets: json['pets'] != null
+          ? List<PetModel>.from(json['pets'].map((x) => PetModel.fromJson(x)))
+          : [],
+    );
+  }
 
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'firebaseId': firebaseId,
       'name': name,
       'phone': phone,
       'instagram': instagram,
       'email': email,
       'password': password,
-      'address': {'cep': cep, 'city': city, 'state': state},
+      'address': address?.toJson(),
       'isOng': isOng,
+      'profilePicture': profilePicture,
+      'pets': pets.map((x) => x.toJson()).toList(),
     };
   }
 }
