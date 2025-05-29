@@ -2,7 +2,7 @@ import 'package:adotai/screens/pet_register_screen.dart';
 import 'package:adotai/widgets/pet/user_pet_card.dart';
 import 'package:flutter/material.dart';
 import '../models/pet_model.dart';
-import '../services/pet_service.dart';
+import '../services/pet_service_mockado.dart';
 import '../widgets/home/appbar.dart';
 
 
