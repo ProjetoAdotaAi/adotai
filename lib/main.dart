@@ -1,14 +1,13 @@
-import 'package:firebase_auth/firebase_auth.dart' show FirebaseAuth;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../providers/auth_provider.dart' as local;
 import '../providers/user_provider.dart';
-import 'screens/home_screen.dart';
+import '../providers/pet_provider.dart';
+import '../services/auth_service.dart';
 import 'screens/splash_screen.dart';
 import '../theme/app_theme.dart';
-import '../services/auth_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,6 +27,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => local.AuthProvider(authService: AuthService()),
         ),
+        ChangeNotifierProvider(create: (_) => PetProvider()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -37,9 +37,7 @@ class MyApp extends StatelessWidget {
             primary: AppTheme.primaryColor,
           ),
         ),
-        home: FirebaseAuth.instance.currentUser != null
-            ? HomeScreen()
-            : SplashScreen(),
+        home: SplashScreen(),
       ),
     );
   }
