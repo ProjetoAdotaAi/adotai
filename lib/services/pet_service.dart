@@ -3,11 +3,15 @@ import '../models/pet_model.dart';
 import '../utils/api.dart';
 
 class PetService {
-  final Api api = Api();
+  final Api api;
 
+  PetService(String? token) : api = Api() {
+    api.setToken(token);
+  }
+  
   Future<String?> createPet(PetModel pet) async {
     try {
-      final response = await api.post('/api/pets', pet.toJson());
+      final response = await api.post('/api/pets', pet.toJson(), );
       if (response.statusCode == 201) return null;
       return 'Erro ao criar pet: ${response.statusCode}';
     } catch (e) {
