@@ -5,6 +5,12 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 class Api {
   final String? baseUrl = dotenv.env['BASE_URL'];
 
+  String? _token;
+
+  void setToken(String? token) {
+    _token = token;
+  }
+
   Uri getUri(String path) => Uri.parse('$baseUrl$path');
 
   Future<http.Response> get(String path) async {
@@ -54,9 +60,17 @@ class Api {
     return response;
   }
 
-  Map<String, String> _headers() => {
-        "Content-Type": "application/json",
-      };
+  Map<String, String> _headers() {
+    final headers = {
+      "Content-Type": "application/json",
+    };
+
+    if (_token != null && _token!.isNotEmpty) {
+      headers['Authorization'] = 'Bearer $_token';
+    }
+
+    return headers;
+  }
 
   void _handleErrors(http.Response response) {
     if (response.statusCode >= 400) {
