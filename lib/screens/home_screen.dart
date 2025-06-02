@@ -1,4 +1,4 @@
-import 'package:adotai/screens/swipe_screen.dart';
+import 'package:adotai/screens/swipe_detector_screen.dart';
 import 'package:adotai/widgets/pet/favorite_pets.dart';
 import 'package:flutter/material.dart';
 import '../widgets/home/appbar.dart';
