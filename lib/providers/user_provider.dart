@@ -132,4 +132,14 @@ class UserProvider with ChangeNotifier {
 
     return error;
   }
+
+  Future<List<UserModel>> getAllUsers() async {
+    try {
+      return await _userService.getUsers();
+    } catch (e) {
+      errorMessage = 'Erro ao carregar usuários';
+      notifyListeners();
+      return [];
+    }
+  }
 }
