@@ -1,10 +1,7 @@
-import 'package:adotai/providers/user_provider.dart';
+import 'package:adotai/screens/protector_page.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:geocoding/geocoding.dart';
 import '../../theme/app_theme.dart';
-import 'package:adotai/screens/protector_page.dart';
-import 'package:provider/provider.dart';
 
 class ProtectorsFilterWidget extends StatefulWidget {
   const ProtectorsFilterWidget({super.key});
@@ -28,17 +25,29 @@ class _ProtectorsFilterWidgetState extends State<ProtectorsFilterWidget> {
   final List<String> _sizeOptions = ['Pequeno', 'Médio', 'Grande'];
   final List<String> _sexOptions = ['Macho', 'Fêmea'];
 
-  List<Map<String, dynamic>> _protectors = [];
-  bool _isLoading = true;
+  final List<Map<String, dynamic>> _protectors = [
+    {
+      'name': 'Matheus Morilha',
+      'type': 'Protetor Individual',
+      'location': 'Toledo-PR',
+      'image': 'assets/images/default_icon.png',
+      'latitude': -24.7137,
+      'longitude': -53.7435,
+    },
+    {
+      'name': 'Ana Silva',
+      'type': 'Protetora Comunitária',
+      'location': 'Cascavel-PR',
+      'image': 'assets/images/default_icon.png',
+      'latitude': -24.9578,
+      'longitude': -53.4590,
+    },
+  ];
 
   @override
   void initState() {
     super.initState();
     _getCurrentLocation();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadProtectors();
-    });
   }
 
   Future<void> _getCurrentLocation() async {
@@ -57,42 +66,6 @@ class _ProtectorsFilterWidgetState extends State<ProtectorsFilterWidget> {
     });
   }
 
-  Future<void> _loadProtectors() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final allUsers = await userProvider.getAllUsers();
-
-    List<Map<String, dynamic>> tempList = [];
-
-    for (var user in allUsers) {
-      if (user.isOng && user.address != null) {
-        try {
-          final locations = await locationFromAddress(
-              '${user.address!.cep}, ${user.address!.city}, ${user.address!.state}');
-          if (locations.isNotEmpty) {
-            final loc = locations.first;
-            tempList.add({
-              'name': user.name,
-              'type': 'ONG',
-              'location': '${user.address!.city}-${user.address!.state}',
-              'image': user.profilePicture ?? 'assets/images/default_icon.png',
-              'latitude': loc.latitude,
-              'longitude': loc.longitude,
-            });
-          }
-        } catch (_) {}
-      }
-    }
-
-    setState(() {
-      _protectors = tempList;
-      _isLoading = false;
-    });
-  }
-
   InputBorder _inputBorder(Color color) {
     return OutlineInputBorder(
       borderRadius: BorderRadius.circular(8),
@@ -100,8 +73,7 @@ class _ProtectorsFilterWidgetState extends State<ProtectorsFilterWidget> {
     );
   }
 
-  Widget _buildDropdown(
-      String label, String? value, List<String> items, Function(String?) onChanged) {
+  Widget _buildDropdown(String label, String? value, List<String> items, Function(String?) onChanged) {
     return DropdownButtonFormField<String>(
       value: value,
       decoration: InputDecoration(
@@ -110,7 +82,9 @@ class _ProtectorsFilterWidgetState extends State<ProtectorsFilterWidget> {
         enabledBorder: _inputBorder(Colors.black),
         focusedBorder: _inputBorder(AppTheme.primaryColor),
       ),
-      items: items.map((item) => DropdownMenuItem(value: item, child: Text(item))).toList(),
+      items: items.map((item) {
+        return DropdownMenuItem(value: item, child: Text(item));
+      }).toList(),
       onChanged: onChanged,
     );
   }
@@ -136,25 +110,13 @@ class _ProtectorsFilterWidgetState extends State<ProtectorsFilterWidget> {
         protector['latitude'],
         protector['longitude'],
       );
-      if (distanceInMeters > _distance * 1000) return false;
 
-      if (_selectedSpecies != null && _selectedSpecies!.isNotEmpty) return true;
-      if (_selectedSize != null && _selectedSize!.isNotEmpty) return true;
-      if (_selectedSex != null && _selectedSex!.isNotEmpty) return true;
-      if (_castrated) return true;
-      if (_dewormed) return true;
-      if (_vaccinated) return true;
-
-      return true;
+      return distanceInMeters <= _distance * 1000;
     }).toList();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
     final filtered = _filteredProtectors;
 
     return Padding(
@@ -245,7 +207,7 @@ class _ProtectorsFilterWidgetState extends State<ProtectorsFilterWidget> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const ProtectorPage()),
+                      MaterialPageRoute(builder: (context) => ProtectorPage()),
                     );
                   },
                   child: Card(

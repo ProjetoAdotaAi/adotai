@@ -25,6 +25,7 @@ class AuthProvider extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     final storedToken = prefs.getString('token');
     final storedUser = prefs.getString('user');
+    print("Stored Token: $storedToken");
 
     if (storedToken != null) _token = storedToken;
     if (storedUser != null) _user = jsonDecode(storedUser);
@@ -55,6 +56,7 @@ class AuthProvider extends ChangeNotifier {
     try {
       final response = await authService.login(email, password);
       _token = response['token'];
+      print("Stored Token: $token");
       _user = response['user'];
       await _saveToPrefs();
     } catch (e) {
