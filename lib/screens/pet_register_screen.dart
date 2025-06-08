@@ -5,7 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:provider/provider.dart';
 import '../../models/pet_model.dart';
-import '../../providers/pet_provider.dart';
+import '../providers/pet_provider.dart';
 
 class PetRegistrationScreen extends StatelessWidget {
   const PetRegistrationScreen({super.key});

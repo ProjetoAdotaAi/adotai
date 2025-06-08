@@ -1,96 +1,61 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
+import '../providers/user_provider.dart';
+import '../models/user_model.dart';
 import '../services/auth_service.dart';
 
-class AuthProvider extends ChangeNotifier {
+class AuthProvider with ChangeNotifier {
   final AuthService authService;
+  final UserProvider userProvider;
 
-  String? _token;
-  Map<String, dynamic>? _user;
-  bool _isLoading = false;
-  String? _errorMessage;
+  String? token;
+  String? errorMessage;
+  bool isLoading = false;
 
-  AuthProvider({AuthService? authService})
-      : authService = authService ?? AuthService() {
-    _loadFromPrefs();
-  }
-
-  String? get token => _token;
-  Map<String, dynamic>? get user => _user;
-  bool get isLoading => _isLoading;
-  String? get errorMessage => _errorMessage;
-
-  Future<void> _loadFromPrefs() async {
-    final prefs = await SharedPreferences.getInstance();
-    final storedToken = prefs.getString('token');
-    final storedUser = prefs.getString('user');
-    print("Stored Token: $storedToken");
-
-    if (storedToken != null) _token = storedToken;
-    if (storedUser != null) _user = jsonDecode(storedUser);
-
-    notifyListeners();
-  }
-
-  Future<void> _saveToPrefs() async {
-    final prefs = await SharedPreferences.getInstance();
-    if (_token != null) {
-      await prefs.setString('token', _token!);
-    } else {
-      await prefs.remove('token');
-    }
-
-    if (_user != null) {
-      await prefs.setString('user', jsonEncode(_user));
-    } else {
-      await prefs.remove('user');
-    }
-  }
+  AuthProvider({required this.authService, required this.userProvider});
 
   Future<void> login(String email, String password) async {
-    _isLoading = true;
-    _errorMessage = null;
+    isLoading = true;
+    errorMessage = null;
     notifyListeners();
 
     try {
-      final response = await authService.login(email, password);
-      _token = response['token'];
-      print("Stored Token: $token");
-      _user = response['user'];
-      await _saveToPrefs();
+      final result = await authService.login(email, password);
+      token = result['token'];
+
+      final userJson = result['user'];
+      final user = UserModel.fromJson(userJson);
+
+      userProvider.currentUser = user;
+      userProvider.notifyListeners();
+
     } catch (e) {
-      _errorMessage = e.toString();
+      errorMessage = e.toString();
     }
 
-    _isLoading = false;
+    isLoading = false;
     notifyListeners();
   }
 
   Future<void> loginWithGoogle() async {
-    _isLoading = true;
-    _errorMessage = null;
+    isLoading = true;
+    errorMessage = null;
     notifyListeners();
 
     try {
-      final response = await authService.loginGoogle();
-      _token = response['token'];
-      _user = response['user'];
-      await _saveToPrefs();
+      final result = await authService.loginGoogle();
+      token = result['token'];
+
+      final userJson = result['user'];
+      final user = UserModel.fromJson(userJson);
+
+      userProvider.currentUser = user;
+      userProvider.notifyListeners();
+
     } catch (e) {
-      _errorMessage = e.toString();
+      errorMessage = e.toString();
     }
 
-    _isLoading = false;
-    notifyListeners();
-  }
-
-  void logout() async {
-    _token = null;
-    _user = null;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('token');
-    await prefs.remove('user');
+    isLoading = false;
     notifyListeners();
   }
 }

@@ -11,7 +11,7 @@ class UserProvider with ChangeNotifier {
   bool isLoading = false;
   String? errorMessage;
 
-  int? get userId => currentUser?.id;
+  String? get userId => currentUser?.id;
 
   Future<String?> registerUser({
     required String name,
@@ -33,7 +33,7 @@ class UserProvider with ChangeNotifier {
       final userId = userCredential.user!.uid;
 
       final user = UserModel(
-        id: 0,
+        id: userId,
         firebaseId: userId,
         name: name,
         phone: phone,
@@ -52,7 +52,8 @@ class UserProvider with ChangeNotifier {
         pets: [],
       );
 
-      return await _userService.registerUser(user);
+      final result = await _userService.registerUser(user);
+      return result;
     } on FirebaseAuthException catch (e) {
       if (e.code == 'email-already-in-use') return 'Este e-mail já está em uso.';
       if (e.code == 'invalid-email') return 'E-mail inválido.';
@@ -61,16 +62,20 @@ class UserProvider with ChangeNotifier {
     }
   }
 
-  Future<void> loadUser(int id) async {
+  Future<void> loadUser(String id) async {
     isLoading = true;
     errorMessage = null;
     notifyListeners();
 
     try {
       final user = await _userService.getUserById(id);
-      currentUser = user;
+      if (user == null) {
+        errorMessage = 'Usuário não encontrado';
+      } else {
+        currentUser = user;
+      }
     } catch (e) {
-      errorMessage = 'Erro ao carregar usuário';
+      errorMessage = 'Erro ao carregar usuário: $e';
     }
 
     isLoading = false;
@@ -78,7 +83,7 @@ class UserProvider with ChangeNotifier {
   }
 
   Future<String?> updateUser({
-    required int id,
+    required String? id,
     String? name,
     String? email,
     String? password,
@@ -86,7 +91,7 @@ class UserProvider with ChangeNotifier {
     isLoading = true;
     notifyListeners();
 
-    final error = await _userService.updateUser(id, name: name, email: email, password: password);
+    final error = await _userService.updateUser(id!, name: name, email: email, password: password);
 
     if (error == null) {
       await loadUser(id);
@@ -99,7 +104,7 @@ class UserProvider with ChangeNotifier {
     return error;
   }
 
-  Future<String?> deleteUser(int id) async {
+  Future<String?> deleteUser(String id) async {
     isLoading = true;
     notifyListeners();
 
@@ -111,11 +116,10 @@ class UserProvider with ChangeNotifier {
 
     isLoading = false;
     notifyListeners();
-
     return error;
   }
 
-  Future<String?> updateProfilePicture(int id, String base64Image) async {
+  Future<String?> updateProfilePicture(String id, String base64Image) async {
     isLoading = true;
     notifyListeners();
 
@@ -129,15 +133,15 @@ class UserProvider with ChangeNotifier {
 
     isLoading = false;
     notifyListeners();
-
     return error;
   }
 
   Future<List<UserModel>> getAllUsers() async {
     try {
-      return await _userService.getUsers();
+      final users = await _userService.getUsers();
+      return users;
     } catch (e) {
-      errorMessage = 'Erro ao carregar usuários';
+      errorMessage = 'Erro ao carregar usuários: $e';
       notifyListeners();
       return [];
     }
