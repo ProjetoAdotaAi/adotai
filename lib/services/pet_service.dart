@@ -2,7 +2,7 @@ import '../models/pet_model.dart';
 import '../utils/api.dart';
 
 class PetService {
-  final Api api = Api();
+  final Api api;
 
   Future<void> createPet(PetModel pet) async {
     await api.request('/api/pets', method: 'POST', data: pet.toJson());

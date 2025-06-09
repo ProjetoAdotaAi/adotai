@@ -1,16 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/pet_model.dart';
 import '../services/pet_service.dart';
 
 class PetProvider with ChangeNotifier {
-  final PetService _petService = PetService();
+  late PetService _petService;
+  bool _isInitialized = false;
 
   List<PetModel> pets = [];
   PetModel? selectedPet;
   bool isLoading = false;
   String? errorMessage;
 
+  PetProvider() {
+    _init();
+  }
+
+  Future<void> _init() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token'); 
+    _petService = PetService(token);
+    _isInitialized = true;
+    await loadPets();
+  }
+
   Future<void> loadPets({int page = 1, int limit = 15}) async {
+    if (!_isInitialized) return;
     isLoading = true;
     errorMessage = null;
     notifyListeners();
@@ -26,6 +41,7 @@ class PetProvider with ChangeNotifier {
   }
 
   Future<void> loadPetById(String id) async {
+    if (!_isInitialized) return;
     isLoading = true;
     errorMessage = null;
     notifyListeners();
@@ -42,6 +58,7 @@ class PetProvider with ChangeNotifier {
   }
 
   Future<String?> createPet(PetModel pet) async {
+    if (!_isInitialized) return 'Provider não inicializado';
     isLoading = true;
     errorMessage = null;
     notifyListeners();
@@ -60,6 +77,7 @@ class PetProvider with ChangeNotifier {
   }
 
   Future<String?> updatePet(String id, PetModel pet) async {
+    if (!_isInitialized) return 'Provider não inicializado';
     isLoading = true;
     errorMessage = null;
     notifyListeners();
@@ -79,6 +97,7 @@ class PetProvider with ChangeNotifier {
   }
 
   Future<String?> deletePet(String id) async {
+    if (!_isInitialized) return 'Provider não inicializado';
     isLoading = true;
     errorMessage = null;
     notifyListeners();
