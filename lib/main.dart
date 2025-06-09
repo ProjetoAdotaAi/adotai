@@ -5,9 +5,10 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../providers/auth_provider.dart' as local;
 import '../providers/user_provider.dart';
 import '../providers/pet_provider.dart';
-import '../services/auth_service.dart';
 import 'screens/splash_screen.dart';
 import '../theme/app_theme.dart';
+import 'services/auth_service.dart';
+import 'utils/api.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,11 +22,20 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final api = Api();
+
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => UserProvider()),
-        ChangeNotifierProvider(
-          create: (_) => local.AuthProvider(authService: AuthService()),
+        ChangeNotifierProxyProvider<UserProvider, local.AuthProvider>(
+          create: (context) => local.AuthProvider(
+            authService: AuthService(api: api),
+            userProvider: Provider.of<UserProvider>(context, listen: false),
+          ),
+          update: (context, userProvider, previousAuth) => local.AuthProvider(
+            authService: previousAuth?.authService ?? AuthService(api: api),
+            userProvider: userProvider,
+          ),
         ),
         ChangeNotifierProvider(create: (_) => PetProvider()),
       ],
@@ -37,7 +47,7 @@ class MyApp extends StatelessWidget {
             primary: AppTheme.primaryColor,
           ),
         ),
-        home: SplashScreen(),
+        home: const SplashScreen(),
       ),
     );
   }

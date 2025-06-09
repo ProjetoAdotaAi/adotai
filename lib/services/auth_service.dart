@@ -1,29 +1,22 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:google_sign_in/google_sign_in.dart';
 import '../utils/api.dart';
 
 class AuthService {
-  final Api api = Api();
+  final Api api;
+
+  AuthService({required this.api});
 
   Future<Map<String, dynamic>> login(String email, String password) async {
-    final url = Uri.parse('${api.baseUrl}/api/login');
-
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'email': email, 'password': password}),
+    final data = {'email': email, 'password': password};
+    final response = await api.request(
+      '/api/login',
+      method: 'POST',
+      data: data,
     );
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      return {
-        'token': data['token'],
-        'user': data['user'],
-      };
-    } else {
-      throw Exception(jsonDecode(response.body)['error'] ?? 'Erro ao fazer login');
-    }
+    return {
+      'token': response['token'],
+      'user': response['user'],
+    };
   }
 
   Future<Map<String, dynamic>> loginGoogle() async {
@@ -32,25 +25,20 @@ class AuthService {
 
     if (googleUser == null) throw Exception('Login com Google cancelado');
 
-    final email = googleUser.email;
-    final name = googleUser.displayName ?? '';
+    final data = {
+      'email': googleUser.email,
+      'name': googleUser.displayName ?? '',
+    };
 
-    final url = Uri.parse('${api.baseUrl}/api/login/google');
-
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'email': email, 'name': name}),
+    final response = await api.request(
+      '/api/login/google',
+      method: 'POST',
+      data: data,
     );
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      return {
-        'token': data['token'],
-        'user': data['user'],
-      };
-    } else {
-      throw Exception(jsonDecode(response.body)['error'] ?? 'Erro ao fazer login com Google');
-    }
+    return {
+      'token': response['token'],
+      'user': response['user'],
+    };
   }
 }

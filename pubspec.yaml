@@ -25,6 +25,7 @@ dependencies:
   flutter_dotenv: ^5.2.1
   geolocator: ^14.0.1
   geocoding: ^4.0.0
+  dio: ^5.8.0+1
 
   
 flutter_launcher_icons:

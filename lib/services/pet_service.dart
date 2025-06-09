@@ -1,61 +1,29 @@
-import 'dart:convert';
 import '../models/pet_model.dart';
 import '../utils/api.dart';
 
 class PetService {
   final Api api;
 
-  PetService(String? token) : api = Api() {
-    api.setToken(token);
-  }
-  
-  Future<String?> createPet(PetModel pet) async {
-    try {
-      final response = await api.post('/api/pets', pet.toJson(), );
-      if (response.statusCode == 201) return null;
-      return 'Erro ao criar pet: ${response.statusCode}';
-    } catch (e) {
-      return e.toString();
-    }
+  Future<void> createPet(PetModel pet) async {
+    await api.request('/api/pets', method: 'POST', data: pet.toJson());
   }
 
   Future<List<PetModel>> getPets({int page = 1, int limit = 15}) async {
-    final query = '?page=$page&limit=$limit';
-    final response = await api.get('/api/pets$query');
-    if (response.statusCode == 200) {
-      final body = jsonDecode(response.body);
-      final List data = body['data'];
-      return data.map((json) => PetModel.fromJson(json)).toList();
-    }
-    throw Exception('Erro ao buscar pets');
+    final response = await api.request('/api/pets?page=$page&limit=$limit', method: 'GET');
+    final List data = response['data'];
+    return data.map((json) => PetModel.fromJson(json)).toList();
   }
 
-  Future<PetModel?> getPetById(String id) async {
-    final response = await api.get('/api/pets/$id');
-    if (response.statusCode == 200) {
-      final json = jsonDecode(response.body);
-      return PetModel.fromJson(json);
-    }
-    return null;
+  Future<PetModel> getPetById(String id) async {
+    final json = await api.request('/api/pets/$id', method: 'GET');
+    return PetModel.fromJson(json);
   }
 
-  Future<String?> updatePet(String id, PetModel pet) async {
-    try {
-      final response = await api.put('/api/pets/$id', pet.toJson());
-      if (response.statusCode == 200) return null;
-      return 'Erro ao atualizar pet: ${response.statusCode}';
-    } catch (e) {
-      return e.toString();
-    }
+  Future<void> updatePet(String id, PetModel pet) async {
+    await api.request('/api/pets/$id', method: 'PUT', data: pet.toJson());
   }
 
-  Future<String?> deletePet(String id) async {
-    try {
-      final response = await api.delete('/api/pets/$id');
-      if (response.statusCode == 200) return null;
-      return 'Erro ao deletar pet: ${response.statusCode}';
-    } catch (e) {
-      return e.toString();
-    }
+  Future<void> deletePet(String id) async {
+    await api.request('/api/pets/$id', method: 'DELETE');
   }
 }

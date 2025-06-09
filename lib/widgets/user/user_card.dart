@@ -5,7 +5,6 @@ class UserCard extends StatelessWidget {
   final String phone;
   final String instagram;
   final String location;
-  final String description;
   final String imageUrl;
   final VoidCallback onEdit;
 
@@ -15,7 +14,6 @@ class UserCard extends StatelessWidget {
     required this.phone,
     required this.instagram,
     required this.location,
-    required this.description,
     required this.imageUrl,
     required this.onEdit,
   });
@@ -74,14 +72,6 @@ class UserCard extends StatelessWidget {
                 ),
               ),
             ],
-          ),
-          const SizedBox(height: 12),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              description,
-              style: const TextStyle(fontSize: 14, color: Colors.black87),
-            ),
           ),
           const SizedBox(height: 8),
           Align(

@@ -2,14 +2,14 @@ import 'adress_model.dart';
 import 'pet_model.dart';
 
 class UserModel {
-  final int id;
+  final String id;
   final String firebaseId;
   final String name;
   final String phone;
   final String instagram;
   final String email;
   final String password;
-  final AddressModel? address;
+  final AddressModel? address;  
   final bool isOng;
   final String? profilePicture;
   final List<PetModel> pets;
@@ -30,7 +30,7 @@ class UserModel {
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-      id: json['id'],
+      id: json['id'].toString(),
       firebaseId: json['firebaseId'],
       name: json['name'],
       phone: json['phone'],
@@ -38,7 +38,7 @@ class UserModel {
       email: json['email'],
       password: json['password'],
       address: json['address'] != null ? AddressModel.fromJson(json['address']) : null,
-      isOng: json['isOng'],
+      isOng: json['isOng'] is bool ? json['isOng'] : json['isOng'].toString().toLowerCase() == 'true',
       profilePicture: json['profilePicture'],
       pets: json['pets'] != null
           ? List<PetModel>.from(json['pets'].map((x) => PetModel.fromJson(x)))
@@ -60,5 +60,10 @@ class UserModel {
       'profilePicture': profilePicture,
       'pets': pets.map((x) => x.toJson()).toList(),
     };
+  }
+
+  @override
+  String toString() {
+    return 'UserModel(id: $id, firebaseId: $firebaseId, name: $name, phone: $phone, instagram: $instagram, email: $email, isOng: $isOng, profilePicture: $profilePicture, address: ${address.toString()}, pets: ${pets.length})';
   }
 }

@@ -1,81 +1,58 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class Api {
-  final String? baseUrl = dotenv.env['BASE_URL'];
-
+  final Dio _dio;
   String? _token;
+
+  Api({Dio? dio})
+      : _dio = dio ?? Dio(BaseOptions(baseUrl: dotenv.env['BASE_URL'] ?? '', headers: {
+          'Content-Type': 'application/json',
+        })) {
+    _dio.interceptors.add(InterceptorsWrapper(
+      onRequest: (options, handler) {
+        if (_token != null && _token!.isNotEmpty) {
+          options.headers['Authorization'] = 'Bearer $_token';
+        }
+        handler.next(options);
+      },
+    ));
+  }
 
   void setToken(String? token) {
     _token = token;
   }
 
-  Uri getUri(String path) => Uri.parse('$baseUrl$path');
-
-  Future<http.Response> get(String path) async {
-    final uri = getUri(path);
-    final response = await http.get(uri, headers: _headers());
-    _handleErrors(response);
-    return response;
-  }
-
-  Future<http.Response> post(String path, Map<String, dynamic> body) async {
-    final uri = getUri(path);
-    final response = await http.post(
-      uri,
-      headers: _headers(),
-      body: jsonEncode(body),
-    );
-    _handleErrors(response);
-    return response;
-  }
-
-  Future<http.Response> put(String path, Map<String, dynamic> body) async {
-    final uri = getUri(path);
-    final response = await http.put(
-      uri,
-      headers: _headers(),
-      body: jsonEncode(body),
-    );
-    _handleErrors(response);
-    return response;
-  }
-
-  Future<http.Response> patch(String path, Map<String, dynamic> body) async {
-    final uri = getUri(path);
-    final response = await http.patch(
-      uri,
-      headers: _headers(),
-      body: jsonEncode(body),
-    );
-    _handleErrors(response);
-    return response;
-  }
-
-  Future<http.Response> delete(String path) async {
-    final uri = getUri(path);
-    final response = await http.delete(uri, headers: _headers());
-    _handleErrors(response);
-    return response;
-  }
-
-  Map<String, String> _headers() {
-    final headers = {
-      "Content-Type": "application/json",
-    };
-
-    if (_token != null && _token!.isNotEmpty) {
-      headers['Authorization'] = 'Bearer $_token';
+  Future<dynamic> request(
+    String path, {
+    required String method,
+    Map<String, dynamic>? queryParameters,
+    dynamic data,
+    Map<String, String>? headers,
+  }) async {
+    try {
+      final response = await _dio.request(
+        path,
+        data: data,
+        queryParameters: queryParameters,
+        options: Options(
+          method: method,
+          headers: headers,
+        ),
+      );
+      return response.data;
+    } on DioException catch (e) {
+      throw _handleDioError(e);
     }
-
-    return headers;
   }
 
-  void _handleErrors(http.Response response) {
-    if (response.statusCode >= 400) {
-      final error = jsonDecode(response.body)['error'] ?? 'Erro desconhecido';
-      throw ApiException(response.statusCode, error);
+  Exception _handleDioError(DioException e) {
+    if (e.response != null) {
+      final statusCode = e.response?.statusCode ?? 0;
+      final message = e.response?.data['error'] ?? e.message;
+      return ApiException(statusCode, message.toString());
+    } else {
+      return ApiException(0, e.message ?? 'Error');
     }
   }
 }
@@ -83,7 +60,6 @@ class Api {
 class ApiException implements Exception {
   final int statusCode;
   final String message;
-
   ApiException(this.statusCode, this.message);
 
   @override

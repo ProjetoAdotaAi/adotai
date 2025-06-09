@@ -1,4 +1,3 @@
-import 'dart:convert';
 import '../models/user_model.dart';
 import '../utils/api.dart';
 
@@ -7,83 +6,79 @@ class UserService {
 
   Future<String?> registerUser(UserModel user) async {
     try {
-      final response = await api.post('/api/users', user.toJson());
-      print('POST /api/users => ${response.statusCode}');
-      print('Response body: ${response.body}');
-      if (response.statusCode == 201) return null;
-    } on ApiException catch (e) {
-      print('Error on registerUser: ${e.message}');
-      return e.message;
+      print('Requisição POST /api/users com dados do usuário');
+      await api.request('/api/users', method: 'POST', data: user.toJson());
+      print('Usuário registrado com sucesso na API');
+      return null;
+    } catch (e) {
+      print('Erro na API ao registrar usuário: $e');
+      return e.toString();
     }
-    return 'Erro desconhecido';
   }
 
   Future<List<UserModel>> getUsers() async {
     try {
-      final response = await api.get('/api/users');
-      print('GET /api/users => ${response.statusCode}');
-      print('Response body: ${response.body}');
-      final List data = jsonDecode(response.body);
-      return data.map((json) => UserModel.fromJson(json)).toList();
-    } on ApiException catch (e) {
-      print('Error on getUsers: ${e.message}');
+      print('Requisição GET /api/users');
+      final json = await api.request('/api/users', method: 'GET');
+      final List data = json is List ? json : json['data'];
+      print('Usuários obtidos: ${data.length}');
+      return data.map((e) => UserModel.fromJson(e)).toList();
+    } catch (e) {
+      print('Erro na API ao obter usuários: $e');
       rethrow;
     }
   }
 
-  Future<UserModel?> getUserById(int id) async {
+  Future<UserModel?> getUserById(String id) async {
     try {
-      final response = await api.get('/api/users/$id');
-      print('GET /api/users/$id => ${response.statusCode}');
-      print('Response body: ${response.body}');
-      final json = jsonDecode(response.body);
-      return UserModel.fromJson(json['user']);
-    } on ApiException catch (e) {
-      print('Error on getUserById: ${e.message}');
-      return null;
+      print('Requisição GET /api/users/$id');
+      final json = await api.request('/api/users/$id', method: 'GET');
+      print('Dados do usuário recebidos: $json');
+      print('Usuário obtido com sucesso');
+      return UserModel.fromJson(json['user'] ?? json);
+    } catch (e) {
+      print('Erro na API ao obter usuário: $e');
+      rethrow;
     }
   }
 
-  Future<String?> updateUser(int id, {String? name, String? email, String? password}) async {
-    final Map<String, dynamic> data = {};
+  Future<String?> updateUser(String id, {String? name, String? email, String? password}) async {
+    final data = <String, dynamic>{};
     if (name != null) data['name'] = name;
     if (email != null) data['email'] = email;
     if (password != null) data['password'] = password;
-
     try {
-      final response = await api.put('/api/users/$id', data);
-      print('PUT /api/users/$id => ${response.statusCode}');
-      print('Request data: $data');
-      print('Response body: ${response.body}');
+      print('Requisição PUT /api/users/$id com dados: $data');
+      await api.request('/api/users/$id', method: 'PUT', data: data);
+      print('Usuário atualizado com sucesso');
       return null;
-    } on ApiException catch (e) {
-      print('Error on updateUser: ${e.message}');
-      return e.message;
+    } catch (e) {
+      print('Erro na API ao atualizar usuário: $e');
+      return e.toString();
     }
   }
 
-  Future<String?> deleteUser(int id) async {
+  Future<String?> deleteUser(String id) async {
     try {
-      final response = await api.delete('/api/users/$id');
-      print('DELETE /api/users/$id => ${response.statusCode}');
-      print('Response body: ${response.body}');
+      print('Requisição DELETE /api/users/$id');
+      await api.request('/api/users/$id', method: 'DELETE');
+      print('Usuário deletado com sucesso');
       return null;
-    } on ApiException catch (e) {
-      print('Error on deleteUser: ${e.message}');
-      return e.message;
+    } catch (e) {
+      print('Erro na API ao deletar usuário: $e');
+      return e.toString();
     }
   }
 
-  Future<String?> updateProfilePicture(int id, String base64Image) async {
+  Future<String?> updateProfilePicture(String id, String base64Image) async {
     try {
-      final response = await api.patch('/api/users/$id', {"profilePicture": base64Image});
-      print('PATCH /api/users/$id => ${response.statusCode}');
-      print('Request data: ${{"profilePicture": base64Image}}');
-      print('Response body: ${response.body}');
+      print('Requisição PATCH /api/users/$id para atualizar foto de perfil');
+      await api.request('/api/users/$id', method: 'PATCH', data: {'profilePicture': base64Image});
+      print('Foto de perfil atualizada com sucesso');
       return null;
-    } on ApiException catch (e) {
-      print('Error on updateProfilePicture: ${e.message}');
-      return e.message;
+    } catch (e) {
+      print('Erro na API ao atualizar foto de perfil: $e');
+      return e.toString();
     }
   }
 }

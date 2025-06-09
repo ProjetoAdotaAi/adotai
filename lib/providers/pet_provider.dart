@@ -32,7 +32,7 @@ class PetProvider with ChangeNotifier {
 
     try {
       pets = await _petService.getPets(page: page, limit: limit);
-    } catch (e) {
+    } catch (_) {
       errorMessage = 'Erro ao carregar pets';
     }
 
@@ -49,7 +49,7 @@ class PetProvider with ChangeNotifier {
     try {
       selectedPet = await _petService.getPetById(id);
       if (selectedPet == null) errorMessage = 'Pet não encontrado';
-    } catch (e) {
+    } catch (_) {
       errorMessage = 'Erro ao carregar pet';
     }
 
@@ -63,16 +63,17 @@ class PetProvider with ChangeNotifier {
     errorMessage = null;
     notifyListeners();
 
-    final error = await _petService.createPet(pet);
-    if (error == null) {
+    try {
+      await _petService.createPet(pet);
       await loadPets();
-    } else {
-      errorMessage = error;
+      return null;
+    } catch (e) {
+      errorMessage = 'Erro ao criar pet: ${e.toString()}';
+      return errorMessage;
+    } finally {
+      isLoading = false;
+      notifyListeners();
     }
-
-    isLoading = false;
-    notifyListeners();
-    return error;
   }
 
   Future<String?> updatePet(String id, PetModel pet) async {
@@ -81,17 +82,18 @@ class PetProvider with ChangeNotifier {
     errorMessage = null;
     notifyListeners();
 
-    final error = await _petService.updatePet(id, pet);
-    if (error == null) {
+    try {
+      await _petService.updatePet(id, pet);
       await loadPetById(id);
       await loadPets();
-    } else {
-      errorMessage = error;
+      return null;
+    } catch (e) {
+      errorMessage = 'Erro ao atualizar pet: ${e.toString()}';
+      return errorMessage;
+    } finally {
+      isLoading = false;
+      notifyListeners();
     }
-
-    isLoading = false;
-    notifyListeners();
-    return error;
   }
 
   Future<String?> deletePet(String id) async {
@@ -100,16 +102,17 @@ class PetProvider with ChangeNotifier {
     errorMessage = null;
     notifyListeners();
 
-    final error = await _petService.deletePet(id);
-    if (error == null) {
+    try {
+      await _petService.deletePet(id);
       pets.removeWhere((pet) => pet.id == id);
       if (selectedPet?.id == id) selectedPet = null;
-    } else {
-      errorMessage = error;
+      return null;
+    } catch (e) {
+      errorMessage = 'Erro ao deletar pet: ${e.toString()}';
+      return errorMessage;
+    } finally {
+      isLoading = false;
+      notifyListeners();
     }
-
-    isLoading = false;
-    notifyListeners();
-    return error;
   }
 }
