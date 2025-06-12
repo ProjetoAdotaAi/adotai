@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/pet_model.dart';
-import '../../services/pet_service_mockado.dart';
+import '../../services/pet_service.dart';
 import 'favorite_pet_card.dart';
 
 class FavoritePets extends StatefulWidget {
@@ -11,6 +11,8 @@ class FavoritePets extends StatefulWidget {
 }
 
 class _FavoritePetsState extends State<FavoritePets> {
+  final PetService petService = PetService();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,7 +28,7 @@ class _FavoritePetsState extends State<FavoritePets> {
             const SizedBox(height: 16),
             Expanded(
               child: FutureBuilder<List<PetModel>>(
-                future: PetService.fetchFavorites(),
+                future: petService.getPets(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());

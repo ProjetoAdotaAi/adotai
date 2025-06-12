@@ -1,11 +1,14 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:adotai/widgets/home/appbar.dart';
 import 'package:adotai/widgets/preferences/filter_options.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:io';
 import 'package:provider/provider.dart';
 import '../../models/pet_model.dart';
+import '../models/pet_photo_model.dart';
 import '../providers/pet_provider.dart';
+import '../providers/user_provider.dart';
 
 class PetRegistrationScreen extends StatelessWidget {
   const PetRegistrationScreen({super.key});
@@ -39,35 +42,70 @@ class _PetRegistrationFormState extends State<PetRegistrationForm> {
   final TextEditingController aboutController = TextEditingController();
 
   List<XFile> pickedPhotos = [];
+  bool isSaving = false;
 
   Future<void> onSave() async {
-    if (especie == null || porte == null || idade == null || sexo == null) return;
+    if (isSaving) return;
 
-    final provider = Provider.of<PetProvider>(context, listen: false);
-    final pet = PetModel(
-      id: 0,
-      name: nameController.text.trim(),
-      species: especie!,
-      size: porte!,
-      age: _mapIdadeToInt(idade!),
-      sex: sexo!,
-      castrated: castrado,
-      dewormed: desverminado,
-      vaccinated: vacinado,
-      description: aboutController.text.trim(),
-      adopted: false,
-      ownerId: 1,
-      createdAt: DateTime.now(),
-      photos: [],
-    );
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userId = userProvider.currentUser?.id;
 
-    final error = await provider.createPet(pet);
-    if (error == null) {
-      Navigator.pop(context);
-    } else {
+    if (userId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error)),
+        const SnackBar(content: Text('Usuário não autenticado')),
       );
+      return;
+    }
+
+    if (especie == null || porte == null || idade == null || sexo == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Preencha todos os campos obrigatórios')),
+      );
+      return;
+    }
+
+    setState(() => isSaving = true);
+
+    try {
+      List<PetPhotoModel> photosModels = [];
+      for (var file in pickedPhotos) {
+        final bytes = await File(file.path).readAsBytes();
+        final base64Image = base64Encode(bytes);
+        photosModels.add(PetPhotoModel(url: 'data:image/png;base64,$base64Image'));
+      }
+
+      final pet = PetModel(
+        name: nameController.text.trim(),
+        species: especie!,
+        size: porte!,
+        age: _mapIdadeToInt(idade!),
+        sex: sexo!,
+        castrated: castrado,
+        dewormed: desverminado,
+        vaccinated: vacinado,
+        description: aboutController.text.trim(),
+        adopted: false,
+        ownerId: userId,
+        createdAt: DateTime.now(),
+        photos: photosModels,
+      );
+
+      final provider = Provider.of<PetProvider>(context, listen: false);
+      final error = await provider.createPet(pet);
+
+      if (error == null) {
+        Navigator.pop(context);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(error)),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao salvar pet: $e')),
+      );
+    } finally {
+      setState(() => isSaving = false);
     }
   }
 
@@ -239,7 +277,13 @@ class _PetRegistrationFormState extends State<PetRegistrationForm> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: const Text('Salvar dados'),
+                  child: isSaving
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                        )
+                      : const Text('Salvar dados'),
                 ),
               ),
             ],

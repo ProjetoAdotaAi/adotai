@@ -1,14 +1,14 @@
 class PetPhotoModel {
-  final int id;
+  final int? id;
   final String url;
-  final String publicId;
-  final int petId;
+  final String? publicId;
+  final int? petId;
 
   PetPhotoModel({
-    required this.id,
+    this.id,
     required this.url,
-    required this.publicId,
-    required this.petId,
+    this.publicId,
+    this.petId,
   });
 
   factory PetPhotoModel.fromJson(Map<String, dynamic> json) {
@@ -22,10 +22,10 @@ class PetPhotoModel {
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
+      if (id != null) 'id': id,
       'url': url,
-      'publicId': publicId,
-      'petId': petId,
+      if (publicId != null) 'publicId': publicId,
+      if (petId != null) 'petId': petId,
     };
   }
 }

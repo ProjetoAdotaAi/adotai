@@ -30,25 +30,27 @@ class UserModel {
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-      id: json['id'].toString(),
-      firebaseId: json['firebaseId'],
-      name: json['name'],
-      phone: json['phone'],
-      instagram: json['instagram'],
-      email: json['email'],
-      password: json['password'],
+      id: json['id']?.toString() ?? '',
+      firebaseId: json['firebaseId']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      phone: json['phone']?.toString() ?? '',
+      instagram: json['instagram']?.toString() ?? '',
+      email: json['email']?.toString() ?? '',
+      password: json['password']?.toString() ?? '',
       address: json['address'] != null ? AddressModel.fromJson(json['address']) : null,
-      isOng: json['isOng'] is bool ? json['isOng'] : json['isOng'].toString().toLowerCase() == 'true',
-      profilePicture: json['profilePicture'],
+      isOng: json['isOng'] is bool 
+        ? json['isOng'] 
+        : (json['isOng']?.toString().toLowerCase() == 'true'),
+      profilePicture: json['profilePicture']?.toString(),
       pets: json['pets'] != null
-          ? List<PetModel>.from(json['pets'].map((x) => PetModel.fromJson(x)))
+          ? List<PetModel>.from(
+              (json['pets'] as List).map((x) => PetModel.fromJson(x)))
           : [],
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
       'firebaseId': firebaseId,
       'name': name,
       'phone': phone,

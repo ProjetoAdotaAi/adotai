@@ -1,7 +1,7 @@
 import 'pet_photo_model.dart';
 
 class PetModel {
-  final int id;
+  final int? id;
   final String name;
   final String species;
   final String size;
@@ -12,12 +12,12 @@ class PetModel {
   final bool vaccinated;
   final String description;
   final bool adopted;
-  final int ownerId;
+  final String ownerId;
   final DateTime createdAt;
   final List<PetPhotoModel> photos;
 
   PetModel({
-    required this.id,
+    this.id,
     required this.name,
     required this.species,
     required this.size,
@@ -32,6 +32,24 @@ class PetModel {
     required this.createdAt,
     required this.photos,
   });
+  
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'species': species,
+      'size': size,
+      'age': age,
+      'sex': sex,
+      'castrated': castrated,
+      'dewormed': dewormed,
+      'vaccinated': vaccinated,
+      'description': description,
+      'adopted': adopted,
+      'ownerId': ownerId,
+      'createdAt': createdAt.toIso8601String(),
+      'photos': photos.map((p) => p.toJson()).toList(),
+    };
+  }
 
   factory PetModel.fromJson(Map<String, dynamic> json) {
     return PetModel(
@@ -45,31 +63,10 @@ class PetModel {
       dewormed: json['dewormed'],
       vaccinated: json['vaccinated'],
       description: json['description'],
-      adopted: json['adopted'] ?? false,
+      adopted: json['adopted'],
       ownerId: json['ownerId'],
       createdAt: DateTime.parse(json['createdAt']),
-      photos: json['photos'] != null
-          ? List<PetPhotoModel>.from(json['photos'].map((x) => PetPhotoModel.fromJson(x)))
-          : [],
+      photos: (json['photos'] as List).map((p) => PetPhotoModel.fromJson(p)).toList(),
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'species': species,
-      'size': size,
-      'age': age,
-      'sex': sex,
-      'castrated': castrated,
-      'dewormed': dewormed,
-      'vaccinated': vaccinated,
-      'description': description,
-      'adopted': adopted,
-      'ownerId': ownerId,
-      'createdAt': createdAt.toIso8601String(),
-      'photos': photos.map((x) => x.toJson()).toList(),
-    };
   }
 }
