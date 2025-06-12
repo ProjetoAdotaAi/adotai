@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import '../models/pet_model.dart';
 import '../utils/api.dart';
 
@@ -5,7 +7,21 @@ class PetService {
   final Api api = Api();
 
   Future<void> createPet(PetModel pet) async {
-    await api.request('/api/pets', method: 'POST', data: pet.toJson());
+    final body = pet.toJson();
+    final formattedBody = const JsonEncoder.withIndent('  ').convert(body);
+    print('Requisição enviada para /api/pets:\n$formattedBody');
+
+    final response = await api.request(
+      '/api/pets',
+      method: 'POST',
+      data: body,
+    );
+
+    if (response['statusCode'] != 201) {
+      throw Exception('Erro ao criar pet: ${response['message'] ?? 'Status inesperado'}');
+    }
+
+    print('Resposta: ${response['data']}');
   }
 
   Future<List<PetModel>> getPets({int page = 1, int limit = 15}) async {

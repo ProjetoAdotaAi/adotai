@@ -2,9 +2,8 @@ import 'package:adotai/screens/pet_register_screen.dart';
 import 'package:adotai/widgets/pet/user_pet_card.dart';
 import 'package:flutter/material.dart';
 import '../models/pet_model.dart';
-import '../services/pet_service_mockado.dart';
+import '../services/pet_service.dart';
 import '../widgets/home/appbar.dart';
-
 
 class UserPetList extends StatefulWidget {
   const UserPetList({super.key});
@@ -15,60 +14,58 @@ class UserPetList extends StatefulWidget {
 
 class _UserPetListState extends State<UserPetList> {
   String filter = 'Disponíveis';
+  final PetService petService = PetService();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-       appBar: const CustomAppBar(hasBackButton: true,),
+      appBar: const CustomAppBar(hasBackButton: true),
       body: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Meus Pets', style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 16),
+            Row(
               children: [
-                const Text('Meus Pets', style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 16),
-                       Row(
-             children: [
-                   ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.push(
-                          context, MaterialPageRoute(builder: (_) => PetRegistrationScreen()));
-                      },
-                      icon: const Icon(Icons.add, size: 30),
-                      label: const Text('  Adicionar Pet  '),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange,
-                        foregroundColor: Colors.white,
-                        iconColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const PetRegistrationScreen()),
+                    );
+                  },
+                  icon: const Icon(Icons.add, size: 30),
+                  label: const Text('  Adicionar Pet  '),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    foregroundColor: Colors.white,
+                    iconColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    const SizedBox(width: 22),
-                    DropdownButton<String>(
-                      value: filter,
-                      items: <String>['Disponíveis', 'Adotados', 'Todos']
-                          .map((String value) => DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(value),
-                              ))
-                          .toList(),
-                      onChanged: (String? newValue) {
-                        if (newValue != null) {
-                          setState(() {
-                            filter = newValue;
-                          });
-                        }
-                      },
-                    ),
-                  ],
+                  ),
                 ),
-           const SizedBox(height: 16),
-           Expanded(
+                const SizedBox(width: 22),
+                DropdownButton<String>(
+                  value: filter,
+                  items: <String>['Disponíveis', 'Adotados', 'Todos']
+                      .map((value) => DropdownMenuItem(value: value, child: Text(value)))
+                      .toList(),
+                  onChanged: (newValue) {
+                    if (newValue != null) {
+                      setState(() => filter = newValue);
+                    }
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Expanded(
               child: FutureBuilder<List<PetModel>>(
-                future: PetService.fetchUserPets(),
+                future: petService.getPets(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
@@ -101,9 +98,3 @@ class _UserPetListState extends State<UserPetList> {
     );
   }
 }
-
-
-
-
-
-

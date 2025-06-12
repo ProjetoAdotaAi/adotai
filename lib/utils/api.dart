@@ -2,18 +2,24 @@ import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class Api {
+  static final Api _instance = Api._internal();
+  factory Api() => _instance;
+
   final Dio _dio;
   String? _token;
 
-  Api({Dio? dio})
-      : _dio = dio ?? Dio(BaseOptions(baseUrl: dotenv.env['BASE_URL'] ?? '', headers: {
-          'Content-Type': 'application/json',
-        })) {
+  Api._internal()
+      : _dio = Dio(BaseOptions(
+          baseUrl: dotenv.env['BASE_URL'] ?? '',
+          headers: {'Content-Type': 'application/json'},
+        )) {
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) {
         if (_token != null && _token!.isNotEmpty) {
           options.headers['Authorization'] = 'Bearer $_token';
         }
+        print('API Request: ${options.method} ${options.uri}');
+        print('Token usado: $_token');
         handler.next(options);
       },
     ));

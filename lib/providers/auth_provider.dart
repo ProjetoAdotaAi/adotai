@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import '../providers/user_provider.dart';
+
 import '../models/user_model.dart';
 import '../services/auth_service.dart';
+import '../utils/api.dart';
+import 'user_provider.dart';
 
 class AuthProvider with ChangeNotifier {
   final AuthService authService;
@@ -21,6 +23,8 @@ class AuthProvider with ChangeNotifier {
     try {
       final result = await authService.login(email, password);
       token = result['token'];
+
+      Api().setToken(token);
 
       final userJson = result['user'];
       final user = UserModel.fromJson(userJson);
@@ -44,6 +48,8 @@ class AuthProvider with ChangeNotifier {
     try {
       final result = await authService.loginGoogle();
       token = result['token'];
+
+      Api().setToken(token);
 
       final userJson = result['user'];
       final user = UserModel.fromJson(userJson);
