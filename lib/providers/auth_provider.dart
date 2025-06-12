@@ -38,6 +38,7 @@ class AuthProvider with ChangeNotifier {
 
     isLoading = false;
     notifyListeners();
+
   }
 
   Future<void> loginWithGoogle() async {
