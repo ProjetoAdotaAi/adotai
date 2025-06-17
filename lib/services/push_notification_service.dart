@@ -27,11 +27,19 @@ class PushNotificationService {
       final token = await _messaging.getToken();
 
       if (token != null) {
-        await saveToken(token);
-        print('Firebase Token salvo: $token');
-        await sendTokenNotifications(token);
+        await _saveAndSendToken(token);
       }
     }
+
+    _messaging.onTokenRefresh.listen((newToken) async {
+      await _saveAndSendToken(newToken);
+    });
+  }
+
+  Future<void> _saveAndSendToken(String token) async {
+    await saveToken(token);
+    print('Device Token: $token');
+    await sendTokenNotifications(token);
   }
 
   Future<void> saveToken(String token) async {
