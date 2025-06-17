@@ -1,19 +1,29 @@
-import 'package:firebase_core/firebase_core.dart';
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart' as local;
 import '../providers/user_provider.dart';
 import '../providers/pet_provider.dart';
 import 'screens/splash_screen.dart';
 import '../theme/app_theme.dart';
 import 'services/auth_service.dart';
+import 'services/push_notification_service.dart';
 import 'utils/api.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
   await Firebase.initializeApp();
+
+  if (Platform.isAndroid) {
+    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+    final pushService = PushNotificationService();
+    await pushService.initialize();
+  }
+
   runApp(const MyApp());
 }
 

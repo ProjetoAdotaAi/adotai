@@ -19,4 +19,11 @@ class PermissionService {
     }
     return false;
   }
+
+  static Future<bool> requestNotificationPermissionForAndroid() async {
+    if (Platform.isAndroid) {
+      return await Permission.notification.request().isGranted;
+    }
+    return false;
+  }
 }
