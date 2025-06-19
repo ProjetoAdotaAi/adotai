@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:adotai/providers/forgotPassword_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -36,6 +37,7 @@ class MyApp extends StatelessWidget {
 
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => OtpProvider()),
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProxyProvider<UserProvider, local.AuthProvider>(
           create: (context) => local.AuthProvider(
