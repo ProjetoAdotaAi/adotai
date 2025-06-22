@@ -9,7 +9,6 @@ class SingInEmailLink extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        debugPrint('Cadastre-se com E-mail');
         Navigator.push(context, 
         MaterialPageRoute(builder: (context) => SingUpScreen()));
       },
@@ -31,7 +30,6 @@ class ForgotPasswordLink extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        debugPrint('Recuperar senha');
         Navigator.push(context, 
         MaterialPageRoute(builder: (context) => ForgotPasswordScreen()));
       },

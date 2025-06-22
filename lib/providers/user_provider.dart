@@ -1,17 +1,47 @@
-import 'package:adotai/models/user_model.dart';
-import 'package:adotai/services/user_service.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../models/adress_model.dart';
+import '../models/user_model.dart';
+import '../services/user_service.dart';
 
 class UserProvider with ChangeNotifier {
   final UserService _userService = UserService();
 
-  UserModel? currentUser;
+  UserModel? _currentUser;
   bool isLoading = false;
   String? errorMessage;
 
-  String? get userId => currentUser?.id;
+  UserModel? get currentUser => _currentUser;
+
+  set currentUser(UserModel? user) {
+    _currentUser = user;
+    _saveUserToPrefs(user);
+    notifyListeners();
+  }
+
+  String? get userId => _currentUser?.id;
+
+  Future<void> loadUserFromPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    final jsonString = prefs.getString('user');
+    if (jsonString != null) {
+      final Map<String, dynamic> json = jsonDecode(jsonString);
+      _currentUser = UserModel.fromJson(json);
+      notifyListeners();
+    }
+  }
+
+  Future<void> _saveUserToPrefs(UserModel? user) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (user != null) {
+      final jsonString = jsonEncode(user.toJson());
+      await prefs.setString('user', jsonString);
+    } else {
+      await prefs.remove('user');
+    }
+  }
 
   Future<String?> registerUser({
     required String name,
@@ -25,40 +55,30 @@ class UserProvider with ChangeNotifier {
     required bool isOng,
   }) async {
     try {
-      final userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: email.trim(),
-        password: password,
-      );
-
-      final userId = userCredential.user!.uid;
-
-      final user = UserModel(
-        id: userId,
-        firebaseId: userId,
-        name: name,
-        phone: phone,
-        instagram: instagram,
-        email: email,
-        password: password,
-        address: AddressModel(
-          id: 0,
-          cep: cep,
-          city: city,
-          state: state,
-          userId: 0,
+      final result = await _userService.registerUser(
+        UserModel(
+          id: '',
+          firebaseId: '',
+          name: name,
+          phone: phone,
+          instagram: instagram,
+          email: email,
+          password: password,
+          address: AddressModel(
+            id: '',
+            cep: cep,
+            city: city,
+            state: state,
+            userId: '',
+          ),
+          isOng: isOng,
+          profilePicture: null,
+          pets: [],
         ),
-        isOng: isOng,
-        profilePicture: null,
-        pets: [],
       );
-
-      final result = await _userService.registerUser(user);
       return result;
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'email-already-in-use') return 'Este e-mail já está em uso.';
-      if (e.code == 'invalid-email') return 'E-mail inválido.';
-      if (e.code == 'weak-password') return 'A senha precisa ter pelo menos 6 caracteres.';
-      return 'Erro: ${e.message}';
+    } catch (e) {
+      return 'Erro: $e';
     }
   }
 
@@ -71,8 +91,11 @@ class UserProvider with ChangeNotifier {
       final user = await _userService.getUserById(id);
       if (user == null) {
         errorMessage = 'Usuário não encontrado';
+        _currentUser = null;
+        await _saveUserToPrefs(null);
       } else {
-        currentUser = user;
+        _currentUser = user;
+        await _saveUserToPrefs(user);
       }
     } catch (e) {
       errorMessage = 'Erro ao carregar usuário: $e';
@@ -83,15 +106,31 @@ class UserProvider with ChangeNotifier {
   }
 
   Future<String?> updateUser({
-    required String? id,
+    required String id,
     String? name,
     String? email,
-    String? password,
+    String? phone,
+    String? instagram,
+    String? addressCep,
+    String? addressCity,
+    String? addressState,
   }) async {
     isLoading = true;
     notifyListeners();
 
-    final error = await _userService.updateUser(id!, name: name, email: email, password: password);
+    final data = <String, dynamic>{};
+    if (name != null) data['name'] = name;
+    if (email != null) data['email'] = email;
+    if (phone != null) data['phone'] = phone;
+    if (instagram != null) data['instagram'] = instagram;
+
+    final address = <String, dynamic>{};
+    if (addressCep != null) address['cep'] = addressCep;
+    if (addressCity != null) address['city'] = addressCity;
+    if (addressState != null) address['state'] = addressState;
+    if (address.isNotEmpty) data['address'] = address;
+
+    final error = await _userService.updateUser(id, data);
 
     if (error == null) {
       await loadUser(id);
@@ -112,6 +151,9 @@ class UserProvider with ChangeNotifier {
 
     if (error != null) {
       errorMessage = error;
+    } else {
+      _currentUser = null;
+      await _saveUserToPrefs(null);
     }
 
     isLoading = false;

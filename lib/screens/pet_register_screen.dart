@@ -74,21 +74,29 @@ class _PetRegistrationFormState extends State<PetRegistrationForm> {
         photosModels.add(PetPhotoModel(url: 'data:image/png;base64,$base64Image'));
       }
 
-      final pet = PetModel(
-        name: nameController.text.trim(),
-        species: especie!,
-        size: porte!,
-        age: _mapIdadeToInt(idade!),
-        sex: sexo!,
-        castrated: castrado,
-        dewormed: desverminado,
-        vaccinated: vacinado,
-        description: aboutController.text.trim(),
-        adopted: false,
-        ownerId: userId,
-        createdAt: DateTime.now(),
-        photos: photosModels,
-      );
+     final pet = PetModel(
+      name: nameController.text.trim(),
+      species: especie == 'Cachorro' ? PetSpecies.DOG : PetSpecies.CAT,
+      size: porte == 'Pequeno'
+          ? PetSize.SMALL
+          : porte == 'Médio'
+              ? PetSize.MEDIUM
+              : PetSize.LARGE,
+      age: idade == 'Filhote'
+          ? PetAge.YOUNG
+          : idade == 'Adulto'
+              ? PetAge.ADULT
+              : PetAge.SENIOR,
+      sex: sexo == 'Macho' ? PetSex.MALE : PetSex.FEMALE,
+      castrated: castrado,
+      dewormed: desverminado,
+      vaccinated: vacinado,
+      description: aboutController.text.trim(),
+      adopted: false,
+      ownerId: userId,
+      createdAt: DateTime.now(),
+      photos: photosModels,
+    );
 
       final provider = Provider.of<PetProvider>(context, listen: false);
       final error = await provider.createPet(pet);
@@ -106,19 +114,6 @@ class _PetRegistrationFormState extends State<PetRegistrationForm> {
       );
     } finally {
       setState(() => isSaving = false);
-    }
-  }
-
-  int _mapIdadeToInt(String label) {
-    switch (label) {
-      case 'Filhote':
-        return 0;
-      case 'Adulto':
-        return 1;
-      case 'Idoso':
-        return 2;
-      default:
-        return 1;
     }
   }
 

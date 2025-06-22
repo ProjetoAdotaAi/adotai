@@ -1,8 +1,8 @@
 class PetPhotoModel {
-  final int? id;
+  final String? id;
   final String url;
   final String? publicId;
-  final int? petId;
+  final String? petId;
 
   PetPhotoModel({
     this.id,

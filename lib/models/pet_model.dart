@@ -1,12 +1,17 @@
 import 'pet_photo_model.dart';
 
+enum PetSpecies { DOG, CAT }
+enum PetSize { SMALL, MEDIUM, LARGE }
+enum PetAge { YOUNG, ADULT, SENIOR }
+enum PetSex { MALE, FEMALE }
+
 class PetModel {
-  final int? id;
+  final String? id;
   final String name;
-  final String species;
-  final String size;
-  final int age;
-  final String sex;
+  final PetSpecies species;
+  final PetSize size;
+  final PetAge age;
+  final PetSex sex;
   final bool castrated;
   final bool dewormed;
   final bool vaccinated;
@@ -32,14 +37,15 @@ class PetModel {
     required this.createdAt,
     required this.photos,
   });
-  
+
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'name': name,
-      'species': species,
-      'size': size,
-      'age': age,
-      'sex': sex,
+      'species': species.name,
+      'size': size.name,
+      'age': age.name,
+      'sex': sex.name,
       'castrated': castrated,
       'dewormed': dewormed,
       'vaccinated': vaccinated,
@@ -55,10 +61,10 @@ class PetModel {
     return PetModel(
       id: json['id'],
       name: json['name'],
-      species: json['species'],
-      size: json['size'],
-      age: json['age'],
-      sex: json['sex'],
+      species: PetSpecies.values.firstWhere((e) => e.name == json['species']),
+      size: PetSize.values.firstWhere((e) => e.name == json['size']),
+      age: PetAge.values.firstWhere((e) => e.name == json['age']),
+      sex: PetSex.values.firstWhere((e) => e.name == json['sex']),
       castrated: json['castrated'],
       dewormed: json['dewormed'],
       vaccinated: json['vaccinated'],

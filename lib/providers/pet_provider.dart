@@ -7,6 +7,9 @@ class PetProvider with ChangeNotifier {
   bool isLoading = false;
   String? errorMessage;
   List<PetModel> pets = [];
+  int currentPage = 1;
+  int limit = 15;
+  bool hasMore = true;
 
   Future<String?> createPet(PetModel pet) async {
     isLoading = true;
@@ -15,7 +18,7 @@ class PetProvider with ChangeNotifier {
 
     try {
       await _petService.createPet(pet);
-      await loadPets();
+      await loadPets(reset: true);
       return null;
     } catch (e) {
       errorMessage = 'Erro ao criar pet: ${e.toString()}';
@@ -26,14 +29,76 @@ class PetProvider with ChangeNotifier {
     }
   }
 
-  Future<void> loadPets() async {
+  Future<void> loadPets({bool reset = false}) async {
+    if (isLoading) return;
+    if (reset) {
+      currentPage = 1;
+      hasMore = true;
+      pets = [];
+      notifyListeners();
+    }
+    if (!hasMore) return;
+
     isLoading = true;
+    errorMessage = null;
     notifyListeners();
 
     try {
-      pets = await _petService.getPets();
+      final newPets = await _petService.getPets(page: currentPage, limit: limit);
+      if (newPets.length < limit) {
+        hasMore = false;
+      }
+      pets.addAll(newPets);
+      currentPage++;
     } catch (e) {
       errorMessage = 'Erro ao carregar pets: ${e.toString()}';
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<PetModel?> getPetById(String id) async {
+    try {
+      return await _petService.getPetById(id);
+    } catch (e) {
+      errorMessage = 'Erro ao buscar pet: ${e.toString()}';
+      notifyListeners();
+      return null;
+    }
+  }
+
+  Future<String?> updatePet(String id, PetModel pet) async {
+    isLoading = true;
+    errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _petService.updatePet(id, pet);
+      await loadPets(reset: true);
+      return null;
+    } catch (e) {
+      errorMessage = 'Erro ao atualizar pet: ${e.toString()}';
+      return errorMessage;
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<String?> deletePet(String id) async {
+    isLoading = true;
+    errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _petService.deletePet(id);
+      pets.removeWhere((p) => p.id == id);
+      notifyListeners();
+      return null;
+    } catch (e) {
+      errorMessage = 'Erro ao deletar pet: ${e.toString()}';
+      return errorMessage;
     } finally {
       isLoading = false;
       notifyListeners();

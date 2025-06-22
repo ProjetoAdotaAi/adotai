@@ -18,7 +18,6 @@ class InteractionService {
         },
       );
     } catch (e) {
-      print('Erro ao criar interação: $e');
       rethrow;
     }
   }
@@ -60,7 +59,6 @@ class InteractionService {
       final List data = response['data'];
       return data.map((json) => PetModel.fromJson(json)).toList();
     } catch (e) {
-      print('Erro ao buscar pets para interação: $e');
       rethrow;
     }
   }
@@ -84,7 +82,6 @@ class InteractionService {
       final List data = response['data'];
       return data.map((json) => PetModel.fromJson(json)).toList();
     } catch (e) {
-      print('Erro ao buscar interações do usuário: $e');
       rethrow;
     }
   }

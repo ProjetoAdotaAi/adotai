@@ -23,6 +23,12 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
     final user = userProvider.currentUser;
+
+    print('>>> HomeScreen build');
+    print('Usuário atual: $user');
+    print('isOng: ${user?.isOng}');
+    print('user?.runtimeType: ${user?.runtimeType}');
+
     bool isOng = user?.isOng ?? false;
 
     final List<Widget> pages = [
@@ -34,7 +40,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       appBar: const CustomAppBar(),
-      body: pages[_currentIndex],
+      body: user == null
+          ? const Center(child: CircularProgressIndicator())
+          : pages[_currentIndex],
       bottomNavigationBar: CustomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
@@ -46,4 +54,3 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
-

@@ -1,9 +1,9 @@
-class AddressModel {
-  final int id;
+ class AddressModel {
+  final String id;
   final String cep;
   final String city;
   final String state;
-  final int userId;
+  final String userId;
 
   AddressModel({
     required this.id,
