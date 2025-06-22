@@ -16,8 +16,6 @@ class AuthService {
         data: data,
       );
 
-      print('Response login completa: $response');
-
       if (response.containsKey('token') && response.containsKey('user')) {
         return {
           'token': response['token'],

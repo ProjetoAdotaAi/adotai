@@ -25,7 +25,6 @@ class _UserScreenState extends State<UserScreen> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
-      print('User ID on initState: ${userProvider.userId}');
 
       if (userProvider.currentUser == null && userProvider.userId != null) {
         userProvider.loadUser(userProvider.userId!);
