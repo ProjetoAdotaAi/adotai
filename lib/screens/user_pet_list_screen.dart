@@ -15,6 +15,34 @@ class UserPetList extends StatefulWidget {
 class _UserPetListState extends State<UserPetList> {
   String filter = 'Disponíveis';
   final PetService petService = PetService();
+  late Future<List<PetModel>> futurePets;
+
+  @override
+  void initState() {
+    super.initState();
+    futurePets = _fetchFilteredPets();
+  }
+
+  Future<List<PetModel>> _fetchFilteredPets() async {
+    final allPets = await petService.getPets();
+    switch (filter) {
+      case 'Disponíveis':
+        return allPets.where((pet) => pet.adopted == false).toList();
+      case 'Adotados':
+        return allPets.where((pet) => pet.adopted == true).toList();
+      case 'Todos':
+      default:
+        return allPets;
+    }
+  }
+
+  void _onFilterChanged(String? newFilter) {
+    if (newFilter == null || newFilter == filter) return;
+    setState(() {
+      filter = newFilter;
+      futurePets = _fetchFilteredPets();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +62,11 @@ class _UserPetListState extends State<UserPetList> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (_) => const PetRegistrationScreen()),
-                    );
+                    ).then((_) {
+                      setState(() {
+                        futurePets = _fetchFilteredPets();
+                      });
+                    });
                   },
                   icon: const Icon(Icons.add, size: 30),
                   label: const Text('  Adicionar Pet  '),
@@ -54,18 +86,14 @@ class _UserPetListState extends State<UserPetList> {
                   items: <String>['Disponíveis', 'Adotados', 'Todos']
                       .map((value) => DropdownMenuItem(value: value, child: Text(value)))
                       .toList(),
-                  onChanged: (newValue) {
-                    if (newValue != null) {
-                      setState(() => filter = newValue);
-                    }
-                  },
+                  onChanged: _onFilterChanged,
                 ),
               ],
             ),
             const SizedBox(height: 16),
             Expanded(
               child: FutureBuilder<List<PetModel>>(
-                future: petService.getPets(),
+                future: futurePets,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());

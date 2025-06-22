@@ -8,7 +8,6 @@ class AuthService {
 
   Future<Map<String, dynamic>> login(String email, String password) async {
     final data = {'email': email, 'password': password};
-    print('Enviando dados de login: $data');
 
     try {
       final response = await api.request(
@@ -17,19 +16,15 @@ class AuthService {
         data: data,
       );
 
-      print('Resposta recebida: $response');
-
       if (response.containsKey('token') && response.containsKey('user')) {
         return {
           'token': response['token'],
           'user': response['user'],
         };
       } else {
-        print('Erro: resposta incompleta');
         throw Exception('Resposta incompleta do servidor');
       }
     } catch (e) {
-      print('Erro no login: $e');
       rethrow;
     }
   }
@@ -39,7 +34,6 @@ class AuthService {
     final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
 
     if (googleUser == null) {
-      print('Login com Google cancelado');
       throw Exception('Login com Google cancelado');
     }
 
@@ -55,19 +49,15 @@ class AuthService {
         data: data,
       );
 
-      print('Resposta recebida do login Google: $response');
-
       if (response.containsKey('token') && response.containsKey('user')) {
         return {
           'token': response['token'],
           'user': response['user'],
         };
       } else {
-        print('Erro: resposta incompleta do login Google');
         throw Exception('Resposta incompleta do servidor');
       }
     } catch (e) {
-      print('Erro no login Google: $e');
       rethrow;
     }
   }

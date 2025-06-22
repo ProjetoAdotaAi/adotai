@@ -38,7 +38,6 @@ class PushNotificationService {
 
   Future<void> _saveAndSendToken(String token) async {
     await saveToken(token);
-    print('Device Token: $token');
     await sendTokenNotifications(token);
   }
 
@@ -64,12 +63,9 @@ class PushNotificationService {
       final response = await request.close();
 
       if (response.statusCode == 200) {
-        print('Token enviado com sucesso ao backend');
       } else {
-        print('Erro ao enviar token: ${response.statusCode}');
       }
     } catch (e) {
-      print('Erro na requisição: $e');
     } finally {
       client.close();
     }

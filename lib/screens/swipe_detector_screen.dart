@@ -84,8 +84,37 @@ class _SwipeScreenState extends State<SwipeScreen> {
         }
 
         if (currentIndex >= pets.length) {
-          return const Scaffold(
-            body: Center(child: Text('Sem mais pets :(', style: TextStyle(fontSize: 24))),
+          return Scaffold(
+            body: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.pets,
+                    size: 72,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Sem mais pets',
+                    style: TextStyle(
+                      fontSize: 24,
+                      color: Theme.of(context).primaryColor,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Volte mais tarde para ver novos amigos!',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Theme.of(context).primaryColor.withOpacity(0.7),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
           );
         }
 

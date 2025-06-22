@@ -18,8 +18,6 @@ class Api {
         if (_token != null && _token!.isNotEmpty) {
           options.headers['Authorization'] = 'Bearer $_token';
         }
-        print('API Request: ${options.method} ${options.uri}');
-        print('Token usado: $_token');
         handler.next(options);
       },
     ));

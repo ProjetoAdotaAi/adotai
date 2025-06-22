@@ -22,12 +22,14 @@ class _UserScreenState extends State<UserScreen> {
   @override
   void initState() {
     super.initState();
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    print('[UserScreen] initState - currentUser: ${userProvider.currentUser}');
-    print('[UserScreen] initState - userId: ${userProvider.userId}');
-    if (userProvider.currentUser == null && userProvider.userId != null) {
-      userProvider.loadUser(userProvider.userId!);
-    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+      if (userProvider.currentUser == null && userProvider.userId != null) {
+        userProvider.loadUser(userProvider.userId!);
+      }
+    });
   }
 
   @override
@@ -35,8 +37,6 @@ class _UserScreenState extends State<UserScreen> {
     return Consumer<UserProvider>(
       builder: (context, userProvider, child) {
         final user = userProvider.currentUser;
-        print('[UserScreen] currentUser data: $user');
-        print('[UserScreen] isOng: ${user?.isOng}');
 
         if (userProvider.isLoading) {
           return const Scaffold(
@@ -92,8 +92,6 @@ class _UserScreenState extends State<UserScreen> {
                         );
                       },
                     ),
-                  ],
-                  if (!user.isOng) ...[
                     const SizedBox(height: 12),
                     ActionTile(
                       icon: Icons.favorite_border,

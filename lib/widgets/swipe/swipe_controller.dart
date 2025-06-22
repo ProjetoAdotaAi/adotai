@@ -22,7 +22,8 @@ class SwipeController extends StatefulWidget {
   State<SwipeController> createState() => _SwipeControllerState();
 }
 
-class _SwipeControllerState extends State<SwipeController> with SingleTickerProviderStateMixin {
+class _SwipeControllerState extends State<SwipeController>
+    with SingleTickerProviderStateMixin {
   Offset cardOffset = Offset.zero;
   double cardRotation = 0;
 
@@ -32,6 +33,9 @@ class _SwipeControllerState extends State<SwipeController> with SingleTickerProv
 
   bool isDragging = false;
   bool isVerticalDrag = false;
+
+  static const double swipeThreshold = 150;
+  static const double maxRotation = 0.35; // ~20 degrees
 
   @override
   void initState() {
@@ -51,11 +55,11 @@ class _SwipeControllerState extends State<SwipeController> with SingleTickerProv
 
     animationController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
-        if (cardOffset.dx > 150) {
+        if (cardOffset.dx > swipeThreshold) {
           widget.onSwipeRight();
-        } else if (cardOffset.dx < -150) {
+        } else if (cardOffset.dx < -swipeThreshold) {
           widget.onSwipeLeft();
-        } else if (cardOffset.dy < -150) {
+        } else if (cardOffset.dy < -swipeThreshold) {
           widget.onSwipeUp();
         } else {
           widget.onSwipeCancel();
@@ -76,28 +80,40 @@ class _SwipeControllerState extends State<SwipeController> with SingleTickerProv
   }
 
   void animateBack() {
-    animationOffset = Tween<Offset>(begin: cardOffset, end: Offset.zero).animate(animationController);
-    animationRotation = Tween<double>(begin: cardRotation, end: 0).animate(animationController);
+    animationOffset =
+        Tween<Offset>(begin: cardOffset, end: Offset.zero).animate(
+      CurvedAnimation(parent: animationController, curve: Curves.easeOut),
+    );
+    animationRotation =
+        Tween<double>(begin: cardRotation, end: 0).animate(
+      CurvedAnimation(parent: animationController, curve: Curves.easeOut),
+    );
     animationController.forward(from: 0);
   }
 
   void animateCardOut(Offset targetOffset) {
-    animationOffset = Tween<Offset>(begin: cardOffset, end: targetOffset).animate(animationController);
-    animationRotation = Tween<double>(begin: cardRotation, end: 0).animate(animationController);
+    animationOffset =
+        Tween<Offset>(begin: cardOffset, end: targetOffset).animate(
+      CurvedAnimation(parent: animationController, curve: Curves.easeIn),
+    );
+    animationRotation =
+        Tween<double>(begin: cardRotation, end: 0).animate(
+      CurvedAnimation(parent: animationController, curve: Curves.easeIn),
+    );
     animationController.forward(from: 0);
   }
 
   void handleSwipeEnd() {
     if (!isVerticalDrag) {
-      if (cardOffset.dx > 150) {
+      if (cardOffset.dx > swipeThreshold) {
         animateCardOut(const Offset(500, 0));
-      } else if (cardOffset.dx < -150) {
+      } else if (cardOffset.dx < -swipeThreshold) {
         animateCardOut(const Offset(-500, 0));
       } else {
         animateBack();
       }
     } else {
-      if (cardOffset.dy < -150) {
+      if (cardOffset.dy < -swipeThreshold) {
         animateCardOut(const Offset(0, -500));
       } else {
         animateBack();
@@ -115,25 +131,29 @@ class _SwipeControllerState extends State<SwipeController> with SingleTickerProv
       onPanUpdate: (details) {
         if (!isDragging) return;
 
-        final dx = cardOffset.dx + details.localPosition.dx;
+        final delta = details.delta;
 
         if (!isVerticalDrag) {
-          // Detecta se o movimento vertical é relevante pra swipe up
-          if (details.localPosition.dy < -3) {
+          // Determina se o gesto é vertical ou horizontal depois de um threshold mínimo
+          if (delta.dy.abs() > delta.dx.abs() && delta.dy.abs() > 5) {
             isVerticalDrag = true;
           }
         }
 
         setState(() {
           if (isVerticalDrag) {
-            // Arrasto para cima
-            final dy = (cardOffset.dy + details.localPosition.dy).clamp(-500, 0);
-            cardOffset = Offset(0, dy.toDouble());
+            // Só movimenta verticalmente para cima, com limite
+            final newDy = (cardOffset.dy + delta.dy).clamp(-500, 0);
+            cardOffset = Offset(0, newDy.toDouble());
             cardRotation = 0;
           } else {
-            // Arrasto horizontal com rotação proporcional a dx
-            cardOffset = Offset(dx, 0);
-            cardRotation = 0;
+            // Movimento horizontal com rotação proporcional
+            final newDx = cardOffset.dx + delta.dx;
+            cardOffset = Offset(newDx, 0);
+
+            // Rotação proporcional à distância arrastada, limitando o ângulo
+            cardRotation = (maxRotation * newDx / MediaQuery.of(context).size.width)
+                .clamp(-maxRotation, maxRotation);
           }
         });
       },
