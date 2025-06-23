@@ -1,10 +1,9 @@
 import 'package:adotai/providers/forgotPassword_provider.dart';
 import 'package:adotai/widgets/forgotPassword/showSucessDialog.dart';
-import 'package:adotai/widgets/forgotPassword/showErrorDialog.dart'; // NOVO
+import 'package:adotai/widgets/forgotPassword/showErrorDialog.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
-
 import 'package:adotai/theme/app_theme.dart';
 import 'package:adotai/widgets/home/appbar.dart';
 import 'package:adotai/widgets/singup/form_button_style.dart';

@@ -1,10 +1,11 @@
-import 'package:adotai/providers/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import '../../theme/app_theme.dart';
 import 'package:adotai/screens/protector_page.dart';
 import 'package:provider/provider.dart';
+import '../../models/pet_model.dart';
+import '../providers/user_provider.dart';
 
 class ProtectorsFilterWidget extends StatefulWidget {
   const ProtectorsFilterWidget({super.key});
@@ -17,16 +18,16 @@ class _ProtectorsFilterWidgetState extends State<ProtectorsFilterWidget> {
   double _distance = 100;
   Position? _currentPosition;
 
-  String? _selectedSpecies;
-  String? _selectedSize;
-  String? _selectedSex;
+  PetSpecies? _selectedSpecies;
+  PetSize? _selectedSize;
+  PetSex? _selectedSex;
   bool _castrated = false;
   bool _dewormed = false;
   bool _vaccinated = false;
 
-  final List<String> _speciesOptions = ['Cachorro', 'Gato'];
-  final List<String> _sizeOptions = ['Pequeno', 'Médio', 'Grande'];
-  final List<String> _sexOptions = ['Macho', 'Fêmea'];
+  final List<PetSpecies> _speciesOptions = [PetSpecies.DOG, PetSpecies.CAT];
+  final List<PetSize> _sizeOptions = [PetSize.SMALL, PetSize.MEDIUM, PetSize.LARGE];
+  final List<PetSex> _sexOptions = [PetSex.MALE, PetSex.FEMALE];
 
   List<Map<String, dynamic>> _protectors = [];
   bool _isLoading = true;
@@ -68,19 +69,34 @@ class _ProtectorsFilterWidgetState extends State<ProtectorsFilterWidget> {
     List<Map<String, dynamic>> tempList = [];
 
     for (var user in allUsers) {
-      if (user.isOng && user.address != null) {
+      if (user.isOng && user.address != null && user.pets.isNotEmpty) {
         try {
           final locations = await locationFromAddress(
               '${user.address!.cep}, ${user.address!.city}, ${user.address!.state}');
           if (locations.isNotEmpty) {
             final loc = locations.first;
+
+            final filteredPets = user.pets.where((pet) {
+              if (_selectedSpecies != null && pet.species != _selectedSpecies) return false;
+              if (_selectedSize != null && pet.size != _selectedSize) return false;
+              if (_selectedSex != null && pet.sex != _selectedSex) return false;
+              if (_castrated && !pet.castrated) return false;
+              if (_dewormed && !pet.dewormed) return false;
+              if (_vaccinated && !pet.vaccinated) return false;
+              return true;
+            }).toList();
+
+            if (filteredPets.isEmpty) continue;
+
             tempList.add({
-              'name': user.name,
-              'type': 'ONG',
+              'protectorName': user.name,
+              'protectorType': 'ONG',
               'location': '${user.address!.city}-${user.address!.state}',
               'image': user.profilePicture ?? 'assets/images/default_icon.png',
               'latitude': loc.latitude,
               'longitude': loc.longitude,
+              'pets': filteredPets,
+              'description': user.name,
             });
           }
         } catch (_) {}
@@ -100,9 +116,9 @@ class _ProtectorsFilterWidgetState extends State<ProtectorsFilterWidget> {
     );
   }
 
-  Widget _buildDropdown(
-      String label, String? value, List<String> items, Function(String?) onChanged) {
-    return DropdownButtonFormField<String>(
+  Widget _buildDropdown<T>(
+      String label, T? value, List<T> items, Function(T?) onChanged, String Function(T) display) {
+    return DropdownButtonFormField<T>(
       value: value,
       decoration: InputDecoration(
         labelText: label,
@@ -110,7 +126,9 @@ class _ProtectorsFilterWidgetState extends State<ProtectorsFilterWidget> {
         enabledBorder: _inputBorder(Colors.black),
         focusedBorder: _inputBorder(AppTheme.primaryColor),
       ),
-      items: items.map((item) => DropdownMenuItem(value: item, child: Text(item))).toList(),
+      items: items
+          .map((item) => DropdownMenuItem(value: item, child: Text(display(item))))
+          .toList(),
       onChanged: onChanged,
     );
   }
@@ -129,22 +147,14 @@ class _ProtectorsFilterWidgetState extends State<ProtectorsFilterWidget> {
   List<Map<String, dynamic>> get _filteredProtectors {
     if (_currentPosition == null) return [];
 
-    return _protectors.where((protector) {
+    return _protectors.where((item) {
       final distanceInMeters = Geolocator.distanceBetween(
         _currentPosition!.latitude,
         _currentPosition!.longitude,
-        protector['latitude'],
-        protector['longitude'],
+        item['latitude'],
+        item['longitude'],
       );
       if (distanceInMeters > _distance * 1000) return false;
-
-      if (_selectedSpecies != null && _selectedSpecies!.isNotEmpty) return true;
-      if (_selectedSize != null && _selectedSize!.isNotEmpty) return true;
-      if (_selectedSex != null && _selectedSex!.isNotEmpty) return true;
-      if (_castrated) return true;
-      if (_dewormed) return true;
-      if (_vaccinated) return true;
-
       return true;
     }).toList();
   }
@@ -154,9 +164,7 @@ class _ProtectorsFilterWidgetState extends State<ProtectorsFilterWidget> {
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
-
-    final filtered = _filteredProtectors;
-
+    
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Column(
@@ -200,23 +208,29 @@ class _ProtectorsFilterWidgetState extends State<ProtectorsFilterWidget> {
               style: TextStyle(fontWeight: FontWeight.w600),
             ),
             children: [
-              _buildDropdown('Espécie', _selectedSpecies, _speciesOptions, (value) {
-                setState(() {
-                  _selectedSpecies = value;
-                });
-              }),
+              _buildDropdown<PetSpecies>(
+                'Espécie',
+                _selectedSpecies,
+                _speciesOptions,
+                (value) => setState(() => _selectedSpecies = value),
+                (e) => e.displayName,
+              ),
               const SizedBox(height: 8),
-              _buildDropdown('Porte', _selectedSize, _sizeOptions, (value) {
-                setState(() {
-                  _selectedSize = value;
-                });
-              }),
+              _buildDropdown<PetSize>(
+                'Porte',
+                _selectedSize,
+                _sizeOptions,
+                (value) => setState(() => _selectedSize = value),
+                (e) => e.displayName,
+              ),
               const SizedBox(height: 8),
-              _buildDropdown('Sexo', _selectedSex, _sexOptions, (value) {
-                setState(() {
-                  _selectedSex = value;
-                });
-              }),
+              _buildDropdown<PetSex>(
+                'Sexo',
+                _selectedSex,
+                _sexOptions,
+                (value) => setState(() => _selectedSex = value),
+                (e) => e.displayName,
+              ),
               _buildCheckbox('Castrado', _castrated, (value) {
                 setState(() {
                   _castrated = value ?? false;
@@ -238,14 +252,16 @@ class _ProtectorsFilterWidgetState extends State<ProtectorsFilterWidget> {
           const SizedBox(height: 12),
           Expanded(
             child: ListView.builder(
-              itemCount: filtered.length,
+              itemCount: _filteredProtectors.length,
               itemBuilder: (context, index) {
-                final protector = filtered[index];
+                final protector = _filteredProtectors[index];
                 return GestureDetector(
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const ProtectorPage()),
+                      MaterialPageRoute(
+                        builder: (context) => ProtectorPage(protectorData: protector),
+                      ),
                     );
                   },
                   child: Card(
@@ -260,7 +276,7 @@ class _ProtectorsFilterWidgetState extends State<ProtectorsFilterWidget> {
                           ClipRRect(
                             borderRadius: BorderRadius.circular(8),
                             child: Image.asset(
-                              protector['image']!,
+                              protector['image'],
                               width: 64,
                               height: 64,
                               fit: BoxFit.cover,
@@ -272,22 +288,17 @@ class _ProtectorsFilterWidgetState extends State<ProtectorsFilterWidget> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  protector['name']!,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                  protector['protectorName'],
+                                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                ),
+                                Text(protector['protectorType'], style: const TextStyle(fontSize: 14)),
+                                Text(
+                                  protector['location'],
+                                  style: const TextStyle(fontSize: 12, color: Colors.grey),
                                 ),
                                 Text(
-                                  protector['type']!,
-                                  style: const TextStyle(fontSize: 14),
-                                ),
-                                Text(
-                                  protector['location']!,
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey,
-                                  ),
+                                  '${(protector['pets'] as List).length} pets disponíveis',
+                                  style: const TextStyle(fontSize: 12, color: Colors.grey),
                                 ),
                               ],
                             ),

@@ -17,6 +17,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   bool obscurePassword = true;
+  bool _isMounted = true;
 
   void togglePasswordVisibility() {
     setState(() {
@@ -26,6 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   void dispose() {
+    _isMounted = false;
     emailController.dispose();
     passwordController.dispose();
     super.dispose();
@@ -90,14 +92,19 @@ class _LoginScreenState extends State<LoginScreen> {
                           : () async {
                               final email = emailController.text.trim();
                               final password = passwordController.text.trim();
+                              final auth = context.read<AuthProvider>();
 
-                              await authProvider.login(email, password);
+                              await auth.login(email, password);
 
-                              if (authProvider.errorMessage != null) {
+                              if (!_isMounted) return;
+
+                              if (auth.errorMessage != null) {
+                                if (!mounted) return;
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text(authProvider.errorMessage!)),
+                                  SnackBar(content: Text(auth.errorMessage!)),
                                 );
-                              } else if (authProvider.token != null) {
+                              } else if (auth.token != null) {
+                                if (!mounted) return;
                                 Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(
@@ -125,13 +132,19 @@ class _LoginScreenState extends State<LoginScreen> {
                       onPressed: authProvider.isLoading
                           ? null
                           : () async {
-                              await authProvider.loginWithGoogle();
+                              final auth = context.read<AuthProvider>();
 
-                              if (authProvider.errorMessage != null) {
+                              await auth.loginWithGoogle();
+
+                              if (!_isMounted) return;
+
+                              if (auth.errorMessage != null) {
+                                if (!mounted) return;
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text(authProvider.errorMessage!)),
+                                  SnackBar(content: Text(auth.errorMessage!)),
                                 );
-                              } else if (authProvider.token != null) {
+                              } else if (auth.token != null) {
+                                if (!mounted) return;
                                 Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(

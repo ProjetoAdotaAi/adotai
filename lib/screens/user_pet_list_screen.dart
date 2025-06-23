@@ -1,9 +1,9 @@
 import 'package:adotai/screens/pet_register_screen.dart';
-import 'package:adotai/widgets/pet/user_pet_card.dart';
 import 'package:flutter/material.dart';
 import '../models/pet_model.dart';
 import '../services/pet_service.dart';
-import '../widgets/home/appbar.dart';
+import '../widgets/pet/user_pet_card.dart';
+import 'pet_edit_screen.dart';
 
 class UserPetList extends StatefulWidget {
   const UserPetList({super.key});
@@ -13,41 +13,34 @@ class UserPetList extends StatefulWidget {
 }
 
 class _UserPetListState extends State<UserPetList> {
-  String filter = 'Disponíveis';
   final PetService petService = PetService();
   late Future<List<PetModel>> futurePets;
 
   @override
   void initState() {
     super.initState();
-    futurePets = _fetchFilteredPets();
+    futurePets = petService.getPets();
   }
 
-  Future<List<PetModel>> _fetchFilteredPets() async {
-    final allPets = await petService.getPets();
-    switch (filter) {
-      case 'Disponíveis':
-        return allPets.where((pet) => pet.adopted == false).toList();
-      case 'Adotados':
-        return allPets.where((pet) => pet.adopted == true).toList();
-      case 'Todos':
-      default:
-        return allPets;
-    }
-  }
-
-  void _onFilterChanged(String? newFilter) {
-    if (newFilter == null || newFilter == filter) return;
+  Future<void> _reloadPets() async {
     setState(() {
-      filter = newFilter;
-      futurePets = _fetchFilteredPets();
+      futurePets = petService.getPets();
     });
+  }
+
+  void _onEditPet(PetModel pet) async {
+    final updated = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(builder: (_) => PetEditScreen(pet: pet)),
+    );
+    if (updated == true) {
+      _reloadPets();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomAppBar(hasBackButton: true),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -55,40 +48,24 @@ class _UserPetListState extends State<UserPetList> {
           children: [
             const Text('Meus Pets', style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const PetRegistrationScreen()),
-                    ).then((_) {
-                      setState(() {
-                        futurePets = _fetchFilteredPets();
-                      });
-                    });
-                  },
-                  icon: const Icon(Icons.add, size: 30),
-                  label: const Text('  Adicionar Pet  '),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
-                    foregroundColor: Colors.white,
-                    iconColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const PetRegistrationScreen()),
+                ).then((_) => _reloadPets());
+              },
+              icon: const Icon(Icons.add, size: 30),
+              label: const Text('  Adicionar Pet  '),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+                foregroundColor: Colors.white,
+                iconColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                const SizedBox(width: 22),
-                DropdownButton<String>(
-                  value: filter,
-                  items: <String>['Disponíveis', 'Adotados', 'Todos']
-                      .map((value) => DropdownMenuItem(value: value, child: Text(value)))
-                      .toList(),
-                  onChanged: _onFilterChanged,
-                ),
-              ],
+              ),
             ),
             const SizedBox(height: 16),
             Expanded(
@@ -114,7 +91,10 @@ class _UserPetListState extends State<UserPetList> {
                       childAspectRatio: 1,
                     ),
                     itemBuilder: (context, index) {
-                      return PetCard(pet: pets[index]);
+                      return PetCard(
+                        pet: pets[index],
+                        onEdit: () => _onEditPet(pets[index]),
+                      );
                     },
                   );
                 },
