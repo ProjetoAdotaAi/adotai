@@ -275,12 +275,7 @@ class _ProtectorsFilterWidgetState extends State<ProtectorsFilterWidget> {
                         children: [
                           ClipRRect(
                             borderRadius: BorderRadius.circular(8),
-                            child: Image.asset(
-                              protector['image'],
-                              width: 64,
-                              height: 64,
-                              fit: BoxFit.cover,
-                            ),
+                            child: _buildProtectorImage(protector['image']),
                           ),
                           const SizedBox(width: 16),
                           Expanded(
@@ -288,16 +283,19 @@ class _ProtectorsFilterWidgetState extends State<ProtectorsFilterWidget> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  protector['protectorName'],
+                                  protector['protectorName']?.toString() ?? 'Sem nome',
                                   style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                                 ),
-                                Text(protector['protectorType'], style: const TextStyle(fontSize: 14)),
                                 Text(
-                                  protector['location'],
+                                  protector['protectorType']?.toString() ?? 'Tipo desconhecido',
+                                  style: const TextStyle(fontSize: 14),
+                                ),
+                                Text(
+                                  protector['location']?.toString() ?? 'Localização desconhecida',
                                   style: const TextStyle(fontSize: 12, color: Colors.grey),
                                 ),
                                 Text(
-                                  '${(protector['pets'] as List).length} pets disponíveis',
+                                  '${(protector['pets'] is List ? (protector['pets'] as List).length : 0)} pets disponíveis',
                                   style: const TextStyle(fontSize: 12, color: Colors.grey),
                                 ),
                               ],
@@ -315,4 +313,35 @@ class _ProtectorsFilterWidgetState extends State<ProtectorsFilterWidget> {
       ),
     );
   }
+}
+
+Widget _buildProtectorImage(String? imagePath) {
+  if (imagePath == null || imagePath.isEmpty) {
+    return Image.asset(
+      'assets/images/default_icon.png',
+      width: 64,
+      height: 64,
+      fit: BoxFit.cover,
+    );
+  }
+  if (imagePath.startsWith('http')) {
+    return Image.network(
+      imagePath,
+      width: 64,
+      height: 64,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => Image.asset(
+        'assets/images/default_icon.png',
+        width: 64,
+        height: 64,
+        fit: BoxFit.cover,
+      ),
+    );
+  }
+  return Image.asset(
+    imagePath,
+    width: 64,
+    height: 64,
+    fit: BoxFit.cover,
+  );
 }
