@@ -32,4 +32,9 @@ class AddressModel {
       'userId': userId,
     };
   }
+
+  @override
+  String toString() {
+    return 'AddressModel(id: $id, cep: $cep, city: $city, state: $state, userId: $userId)';
+  }
 }

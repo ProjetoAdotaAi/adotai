@@ -15,14 +15,16 @@ class _FavoritePetsState extends State<FavoritePets> {
   @override
   void initState() {
     super.initState();
-    Provider.of<InteractionProvider>(context, listen: false)
-        .loadUserInteractions(InteractionType.FAVORITED);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<InteractionProvider>(context, listen: false)
+          .loadUserInteractions(InteractionType.FAVORITED);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<InteractionProvider>(context);
-    final pets = provider.pets;
+    final pets = provider.favoritedPets;
 
     return Padding(
       padding: const EdgeInsets.all(16),

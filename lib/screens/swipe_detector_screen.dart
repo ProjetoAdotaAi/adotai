@@ -14,10 +14,42 @@ class SwipeScreen extends StatefulWidget {
   State<SwipeScreen> createState() => _SwipeScreenState();
 }
 
-class _SwipeScreenState extends State<SwipeScreen> {
+class _SwipeScreenState extends State<SwipeScreen> with SingleTickerProviderStateMixin {
   int currentIndex = 0;
   double detailsHeight = 0;
   final double maxDetailsHeight = 250;
+
+  late AnimationController _animationController;
+  late Animation<double> _detailsHeightAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final interactionProvider = Provider.of<InteractionProvider>(context, listen: false);
+      final petProvider = Provider.of<PetProvider>(context, listen: false);
+
+      await petProvider.loadPets();
+      await interactionProvider.loadAllUserInteractions();
+
+      setState(() {
+        currentIndex = 0;
+        detailsHeight = 0;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
 
   void nextCard() {
     setState(() {
@@ -26,41 +58,51 @@ class _SwipeScreenState extends State<SwipeScreen> {
     });
   }
 
-  void createInteraction(PetModel pet, InteractionType type) {
-    final provider = Provider.of<InteractionProvider>(context, listen: false);
-    provider.createInteraction(petId: pet.id!, type: type);
+  void createInteraction(PetModel pet, InteractionType type) async {
+    final interactionProvider = Provider.of<InteractionProvider>(context, listen: false);
+    await interactionProvider.createInteraction(petId: pet.id!, type: type);
+    nextCard();
   }
 
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<PetProvider>(context, listen: false).loadPets();
-    });
+  void animateDetailsHeight(double targetHeight) {
+    _animationController.stop();
+    _detailsHeightAnimation = Tween<double>(
+      begin: detailsHeight,
+      end: targetHeight,
+    ).animate(CurvedAnimation(parent: _animationController, curve: Curves.easeInOut))
+      ..addListener(() {
+        setState(() {
+          detailsHeight = _detailsHeightAnimation.value;
+        });
+      });
+    _animationController.forward(from: 0);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<PetProvider>(
-      builder: (context, provider, _) {
-        final pets = provider.pets;
+    return Consumer2<PetProvider, InteractionProvider>(
+      builder: (context, petProvider, interactionProvider, _) {
+        final allPets = petProvider.pets;
+        final interactedPetIds = interactionProvider.interactedPetIds;
 
-        if (provider.isLoading) {
+        final filteredPets = allPets.where((p) => !interactedPetIds.contains(p.id)).toList();
+
+        if (petProvider.isLoading || interactionProvider.isLoading) {
           return const Scaffold(body: Center(child: CircularProgressIndicator()));
         }
 
-        if (provider.errorMessage != null) {
+        if (petProvider.errorMessage != null) {
           return Scaffold(
             body: Center(
               child: Text(
-                provider.errorMessage!,
+                petProvider.errorMessage!,
                 style: const TextStyle(fontSize: 18),
               ),
             ),
           );
         }
 
-        if (currentIndex >= pets.length) {
+        if (filteredPets.isEmpty || currentIndex >= filteredPets.length) {
           return Scaffold(
             body: Center(
               child: Column(
@@ -91,8 +133,8 @@ class _SwipeScreenState extends State<SwipeScreen> {
           );
         }
 
-        final pet = pets[currentIndex];
-        final nextPet = currentIndex + 1 < pets.length ? pets[currentIndex + 1] : null;
+        final pet = filteredPets[currentIndex];
+        final nextPet = currentIndex + 1 < filteredPets.length ? filteredPets[currentIndex + 1] : null;
         final bottomPadding = MediaQuery.of(context).padding.bottom;
 
         return Scaffold(
@@ -115,30 +157,20 @@ class _SwipeScreenState extends State<SwipeScreen> {
                         ),
                       ),
                     SwipeController(
-                      onSwipeRight: () {
-                        createInteraction(pet, InteractionType.FAVORITED);
-                        nextCard();
-                      },
-                      onSwipeLeft: () {
-                        createInteraction(pet, InteractionType.DISCARDED);
-                        nextCard();
-                      },
-                      onSwipeUp: () {
-                        setState(() => detailsHeight = maxDetailsHeight);
-                      },
-                      onSwipeCancel: () {
-                        setState(() => detailsHeight = 0);
-                      },
-                      builder: (offset, rotation) {
-                        return Center(
-                          child: SwipeCard(
-                            pet: pet,
-                            offset: offset,
-                            rotation: rotation,
-                            detailsHeight: detailsHeight,
-                          ),
-                        );
-                      },
+                      key: ValueKey(pet.id),
+                      onSwipeRight: () => createInteraction(pet, InteractionType.FAVORITED),
+                      onSwipeLeft: () => createInteraction(pet, InteractionType.DISCARDED),
+                      onSwipeUp: () => animateDetailsHeight(maxDetailsHeight),
+                      onSwipeDown: () => animateDetailsHeight(0),
+                      onSwipeCancel: () => animateDetailsHeight(0),
+                      builder: (offset, rotation) => Center(
+                        child: SwipeCard(
+                          pet: pet,
+                          offset: offset,
+                          rotation: rotation,
+                          detailsHeight: detailsHeight,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -151,10 +183,7 @@ class _SwipeScreenState extends State<SwipeScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     GestureDetector(
-                      onTap: () {
-                        createInteraction(pet, InteractionType.DISCARDED);
-                        nextCard();
-                      },
+                      onTap: () => createInteraction(pet, InteractionType.DISCARDED),
                       child: CircleAvatar(
                         radius: 30,
                         backgroundColor: Colors.red[400],
@@ -162,10 +191,7 @@ class _SwipeScreenState extends State<SwipeScreen> {
                       ),
                     ),
                     GestureDetector(
-                      onTap: () {
-                        createInteraction(pet, InteractionType.FAVORITED);
-                        nextCard();
-                      },
+                      onTap: () => createInteraction(pet, InteractionType.FAVORITED),
                       child: CircleAvatar(
                         radius: 30,
                         backgroundColor: Colors.green[400],

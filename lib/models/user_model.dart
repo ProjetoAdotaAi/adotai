@@ -29,40 +29,21 @@ class UserModel {
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
-    try {
-      print('Convertendo UserModel: $json');
-
-      return UserModel(
-        id: json['id']?.toString() ?? '',
-        firebaseId: json['firebaseId']?.toString() ?? '',
-        name: json['name']?.toString() ?? '',
-        phone: json['phone']?.toString() ?? '',
-        instagram: json['instagram']?.toString() ?? '',
-        email: json['email']?.toString() ?? '',
-        password: json['password']?.toString() ?? '',
-        address: json['address'] != null ? AddressModel.fromJson(json['address']) : null,
-        isOng: json['isOng'] == true || json['isOng']?.toString().toLowerCase() == 'true',
-        profilePicture: json['profilePicture']?.toString(),
-        pets: (json['pets'] is List)
-            ? (json['pets'] as List).map((x) => PetModel.fromJson(x)).toList()
-            : [],
-      );
-    } catch (e) {
-      print('Erro ao converter UserModel: $e');
-      return UserModel(
-        id: '',
-        firebaseId: '',
-        name: '',
-        phone: '',
-        instagram: '',
-        email: '',
-        password: '',
-        address: null,
-        isOng: false,
-        profilePicture: null,
-        pets: [],
-      );
-    }
+    return UserModel(
+      id: json['id']?.toString() ?? '',
+      firebaseId: json['firebaseId']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      phone: json['phone']?.toString() ?? '',
+      instagram: json['instagram']?.toString() ?? '',
+      email: json['email']?.toString() ?? '',
+      password: json['password']?.toString() ?? '',
+      address: json['address'] != null ? AddressModel.fromJson(json['address']) : null,
+      isOng: json['isOng'] == true || json['isOng']?.toString().toLowerCase() == 'true',
+      profilePicture: json['profilePicture']?.toString(),
+      pets: (json['pets'] is List)
+          ? (json['pets'] as List).map((x) => PetModel.fromJson(x)).toList()
+          : [],
+    );
   }
 
   Map<String, dynamic> toJson() {

@@ -59,7 +59,11 @@ class _UserScreenState extends State<UserScreen> {
                     name: user.name,
                     phone: user.phone,
                     instagram: user.instagram,
-                    location: '${user.address?.city}, ${user.address?.state}',
+                   location: (user.address != null &&
+                        user.address!.city.trim().isNotEmpty &&
+                        user.address!.state.trim().isNotEmpty)
+                  ? '${user.address!.city}, ${user.address!.state}'
+                  : 'Localização não informada',
                     imageUrl: user.profilePicture ?? 'assets/images/default_icon.png',
                     onEdit: () {
                       Navigator.push(

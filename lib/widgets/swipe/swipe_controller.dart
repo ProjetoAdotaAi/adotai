@@ -6,6 +6,7 @@ class SwipeController extends StatefulWidget {
   final VoidCallback onSwipeRight;
   final VoidCallback onSwipeLeft;
   final VoidCallback onSwipeUp;
+  final VoidCallback onSwipeDown;
   final VoidCallback onSwipeCancel;
   final SwipeBuilder builder;
 
@@ -13,6 +14,7 @@ class SwipeController extends StatefulWidget {
     required this.onSwipeRight,
     required this.onSwipeLeft,
     required this.onSwipeUp,
+    required this.onSwipeDown,
     required this.onSwipeCancel,
     required this.builder,
     super.key,
@@ -33,9 +35,10 @@ class _SwipeControllerState extends State<SwipeController>
 
   bool isDragging = false;
   bool isVerticalDrag = false;
+  double verticalDragDirection = 0; // >0 down, <0 up
 
   static const double swipeThreshold = 150;
-  static const double maxRotation = 0.35; // ~20 degrees
+  static const double maxRotation = 0.35;
 
   @override
   void initState() {
@@ -59,8 +62,12 @@ class _SwipeControllerState extends State<SwipeController>
           widget.onSwipeRight();
         } else if (cardOffset.dx < -swipeThreshold) {
           widget.onSwipeLeft();
-        } else if (cardOffset.dy < -swipeThreshold) {
-          widget.onSwipeUp();
+        } else if (isVerticalDrag) {
+          if (verticalDragDirection < 0) {
+            widget.onSwipeUp();
+          } else {
+            widget.onSwipeDown();
+          }
         } else {
           widget.onSwipeCancel();
         }
@@ -68,6 +75,7 @@ class _SwipeControllerState extends State<SwipeController>
         cardOffset = Offset.zero;
         cardRotation = 0;
         isVerticalDrag = false;
+        verticalDragDirection = 0;
         animationController.reset();
       }
     });
@@ -80,44 +88,63 @@ class _SwipeControllerState extends State<SwipeController>
   }
 
   void animateBack() {
-    animationOffset =
-        Tween<Offset>(begin: cardOffset, end: Offset.zero).animate(
-      CurvedAnimation(parent: animationController, curve: Curves.easeOut),
-    );
-    animationRotation =
-        Tween<double>(begin: cardRotation, end: 0).animate(
-      CurvedAnimation(parent: animationController, curve: Curves.easeOut),
-    );
+    animationOffset = Tween<Offset>(
+      begin: cardOffset,
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: animationController,
+      curve: Curves.easeOut,
+    ));
+
+    animationRotation = Tween<double>(
+      begin: cardRotation,
+      end: 0,
+    ).animate(CurvedAnimation(
+      parent: animationController,
+      curve: Curves.easeOut,
+    ));
+
     animationController.forward(from: 0);
   }
 
-  void animateCardOut(Offset targetOffset) {
-    animationOffset =
-        Tween<Offset>(begin: cardOffset, end: targetOffset).animate(
-      CurvedAnimation(parent: animationController, curve: Curves.easeIn),
-    );
-    animationRotation =
-        Tween<double>(begin: cardRotation, end: 0).animate(
-      CurvedAnimation(parent: animationController, curve: Curves.easeIn),
-    );
+  void animateCardOut(Offset targetOffset, double targetRotation) {
+    animationOffset = Tween<Offset>(
+      begin: cardOffset,
+      end: targetOffset,
+    ).animate(CurvedAnimation(
+      parent: animationController,
+      curve: Curves.easeIn,
+    ));
+
+    animationRotation = Tween<double>(
+      begin: cardRotation,
+      end: targetRotation,
+    ).animate(CurvedAnimation(
+      parent: animationController,
+      curve: Curves.easeIn,
+    ));
+
     animationController.forward(from: 0);
   }
 
   void handleSwipeEnd() {
+    final screenWidth = MediaQuery.of(context).size.width;
+
     if (!isVerticalDrag) {
       if (cardOffset.dx > swipeThreshold) {
-        animateCardOut(const Offset(500, 0));
+        animateCardOut(Offset(screenWidth * 1.5, 0), maxRotation);
       } else if (cardOffset.dx < -swipeThreshold) {
-        animateCardOut(const Offset(-500, 0));
+        animateCardOut(Offset(-screenWidth * 1.5, 0), -maxRotation);
       } else {
         animateBack();
       }
     } else {
-      if (cardOffset.dy < -swipeThreshold) {
-        animateCardOut(const Offset(0, -500));
+      if (verticalDragDirection < 0) {
+        widget.onSwipeUp();
       } else {
-        animateBack();
+        widget.onSwipeDown();
       }
+      animateBack();
     }
   }
 
@@ -127,34 +154,30 @@ class _SwipeControllerState extends State<SwipeController>
       onPanStart: (_) {
         isDragging = true;
         isVerticalDrag = false;
+        verticalDragDirection = 0;
+        animationController.stop();
       },
       onPanUpdate: (details) {
         if (!isDragging) return;
 
         final delta = details.delta;
 
-        if (!isVerticalDrag) {
-          // Determina se o gesto é vertical ou horizontal depois de um threshold mínimo
-          if (delta.dy.abs() > delta.dx.abs() && delta.dy.abs() > 5) {
-            isVerticalDrag = true;
-          }
+        if (!isVerticalDrag &&
+            delta.dy.abs() > delta.dx.abs() &&
+            delta.dy.abs() > 5) {
+          isVerticalDrag = true;
+        }
+
+        if (isVerticalDrag) {
+          verticalDragDirection = delta.dy;
+          return;
         }
 
         setState(() {
-          if (isVerticalDrag) {
-            // Só movimenta verticalmente para cima, com limite
-            final newDy = (cardOffset.dy + delta.dy).clamp(-500, 0);
-            cardOffset = Offset(0, newDy.toDouble());
-            cardRotation = 0;
-          } else {
-            // Movimento horizontal com rotação proporcional
-            final newDx = cardOffset.dx + delta.dx;
-            cardOffset = Offset(newDx, 0);
-
-            // Rotação proporcional à distância arrastada, limitando o ângulo
-            cardRotation = (maxRotation * newDx / MediaQuery.of(context).size.width)
-                .clamp(-maxRotation, maxRotation);
-          }
+          final newDx = cardOffset.dx + delta.dx;
+          cardOffset = Offset(newDx, 0);
+          cardRotation = (maxRotation * newDx / MediaQuery.of(context).size.width)
+              .clamp(-maxRotation, maxRotation);
         });
       },
       onPanEnd: (_) {

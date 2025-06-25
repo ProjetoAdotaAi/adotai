@@ -11,6 +11,16 @@ class PetProvider with ChangeNotifier {
   int limit = 15;
   bool hasMore = true;
 
+  final Set<String> _interactedPetIds = {};
+
+  List<PetModel> get filteredPets =>
+      pets.where((pet) => !_interactedPetIds.contains(pet.id)).toList();
+
+  void addInteractedPetId(String id) {
+    _interactedPetIds.add(id);
+    notifyListeners();
+  }
+
   Future<String?> createPet(PetModel pet) async {
     isLoading = true;
     errorMessage = null;
