@@ -9,6 +9,7 @@ import '../providers/auth_provider.dart' as local;
 import '../providers/user_provider.dart';
 import '../providers/pet_provider.dart';
 import 'providers/interaction_provider.dart';
+import 'providers/report_provider.dart';
 import 'screens/splash_screen.dart';
 import '../theme/app_theme.dart';
 import 'services/auth_service.dart';
@@ -41,6 +42,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => OtpProvider()),
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => InteractionProvider()),
+        ChangeNotifierProvider(create: (_) => ReportProvider()),
         ChangeNotifierProxyProvider<UserProvider, local.AuthProvider>(
           create: (context) => local.AuthProvider(
             authService: AuthService(api: api),

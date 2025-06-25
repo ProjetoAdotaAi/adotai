@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../models/pet_model.dart';
+import '../../providers/user_provider.dart';
+import '../report/reportDialog.dart';
+import 'package:provider/provider.dart';
 
 class SwipeCard extends StatefulWidget {
   final PetModel pet;
@@ -145,6 +148,19 @@ class _SwipeCardState extends State<SwipeCard> {
                                 pet.description,
                                 style: const TextStyle(
                                     fontSize: 16, color: Colors.black),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: TextButton(
+                              onPressed: () {
+                                showReportDialog(context, pet.id!);
+                              },
+                              child: const Text(
+                                'Denunciar publicação',
+                                style: TextStyle(color: Colors.white),
                               ),
                             ),
                           ),
