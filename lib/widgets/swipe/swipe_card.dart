@@ -160,7 +160,7 @@ class _SwipeCardState extends State<SwipeCard> {
                               },
                               child: const Text(
                                 'Denunciar publicação',
-                                style: TextStyle(color: Colors.red),
+                                style: TextStyle(color: Colors.white),
                               ),
                             ),
                           ),
