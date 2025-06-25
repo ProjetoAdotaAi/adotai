@@ -1,10 +1,8 @@
-import 'package:adotai/providers/user_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
-import '../../theme/app_theme.dart';
-import 'package:adotai/screens/protector_page.dart';
 import 'package:provider/provider.dart';
+import 'package:adotai/screens/protector_page.dart';
+import '../providers/user_provider.dart';
 
 class ProtectorsFilterWidget extends StatefulWidget {
   const ProtectorsFilterWidget({super.key});
@@ -14,53 +12,25 @@ class ProtectorsFilterWidget extends StatefulWidget {
 }
 
 class _ProtectorsFilterWidgetState extends State<ProtectorsFilterWidget> {
-  double _distance = 100;
-  Position? _currentPosition;
-
-  String? _selectedSpecies;
-  String? _selectedSize;
-  String? _selectedSex;
-  bool _castrated = false;
-  bool _dewormed = false;
-  bool _vaccinated = false;
-
-  final List<String> _speciesOptions = ['Cachorro', 'Gato'];
-  final List<String> _sizeOptions = ['Pequeno', 'Médio', 'Grande'];
-  final List<String> _sexOptions = ['Macho', 'Fêmea'];
-
-  List<Map<String, dynamic>> _protectors = [];
+  List<Map<String, dynamic>> _allProtectors = [];
+  List<Map<String, dynamic>> _filteredProtectors = [];
   bool _isLoading = true;
+
+  String? _selectedState;
+  String? _selectedCity;
+  List<String> _states = [];
+  List<String> _cities = [];
 
   @override
   void initState() {
     super.initState();
-    _getCurrentLocation();
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadProtectors();
     });
   }
 
-  Future<void> _getCurrentLocation() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) return;
-
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.deniedForever) return;
-    }
-
-    final position = await Geolocator.getCurrentPosition();
-    setState(() {
-      _currentPosition = position;
-    });
-  }
-
   Future<void> _loadProtectors() async {
-    setState(() {
-      _isLoading = true;
-    });
+    setState(() => _isLoading = true);
 
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final allUsers = await userProvider.getAllUsers();
@@ -71,237 +41,232 @@ class _ProtectorsFilterWidgetState extends State<ProtectorsFilterWidget> {
       if (user.isOng && user.address != null) {
         try {
           final locations = await locationFromAddress(
-              '${user.address!.cep}, ${user.address!.city}, ${user.address!.state}');
+            '${user.address!.cep}, ${user.address!.city}, ${user.address!.state}',
+          );
           if (locations.isNotEmpty) {
             final loc = locations.first;
             tempList.add({
-              'name': user.name,
-              'type': 'ONG',
+              'protectorName': user.name,
+              'protectorType': 'ONG',
               'location': '${user.address!.city}-${user.address!.state}',
+              'state': user.address!.state,
+              'city': user.address!.city,
               'image': user.profilePicture ?? 'assets/images/default_icon.png',
               'latitude': loc.latitude,
               'longitude': loc.longitude,
+              'pets': user.pets,
+              'description': user.name,
             });
           }
         } catch (_) {}
       }
     }
 
+    _states = tempList.map((p) => p['state'] as String).toSet().toList()..sort();
+
     setState(() {
-      _protectors = tempList;
+      _allProtectors = tempList;
+      _filteredProtectors = List.from(_allProtectors);
       _isLoading = false;
     });
   }
 
-  InputBorder _inputBorder(Color color) {
-    return OutlineInputBorder(
-      borderRadius: BorderRadius.circular(8),
-      borderSide: BorderSide(color: color),
-    );
+  void _filterProtectors() {
+    List<Map<String, dynamic>> filtered = _allProtectors;
+
+    if (_selectedState != null) {
+      filtered = filtered.where((p) => p['state'] == _selectedState).toList();
+    }
+    if (_selectedCity != null) {
+      filtered = filtered.where((p) => p['city'] == _selectedCity).toList();
+    }
+
+    setState(() {
+      _filteredProtectors = filtered;
+    });
   }
 
-  Widget _buildDropdown(
-      String label, String? value, List<String> items, Function(String?) onChanged) {
-    return DropdownButtonFormField<String>(
-      value: value,
-      decoration: InputDecoration(
-        labelText: label,
-        border: _inputBorder(Colors.black),
-        enabledBorder: _inputBorder(Colors.black),
-        focusedBorder: _inputBorder(AppTheme.primaryColor),
-      ),
-      items: items.map((item) => DropdownMenuItem(value: item, child: Text(item))).toList(),
-      onChanged: onChanged,
-    );
+  void _onStateChanged(String? newState) {
+    if (newState == _selectedState) return;
+
+    setState(() {
+      _selectedState = newState;
+      _selectedCity = null;
+      _cities = [];
+
+      if (newState != null) {
+        _cities = _allProtectors
+            .where((p) => p['state'] == newState)
+            .map((p) => p['city'] as String)
+            .toSet()
+            .toList()
+          ..sort();
+      }
+    });
+
+    _filterProtectors();
   }
 
-  Widget _buildCheckbox(String label, bool value, Function(bool?) onChanged) {
-    return CheckboxListTile(
-      title: Text(label),
-      value: value,
-      activeColor: AppTheme.primaryColor,
-      onChanged: onChanged,
-      controlAffinity: ListTileControlAffinity.leading,
-      contentPadding: EdgeInsets.zero,
-    );
-  }
-
-  List<Map<String, dynamic>> get _filteredProtectors {
-    if (_currentPosition == null) return [];
-
-    return _protectors.where((protector) {
-      final distanceInMeters = Geolocator.distanceBetween(
-        _currentPosition!.latitude,
-        _currentPosition!.longitude,
-        protector['latitude'],
-        protector['longitude'],
-      );
-      if (distanceInMeters > _distance * 1000) return false;
-
-      if (_selectedSpecies != null && _selectedSpecies!.isNotEmpty) return true;
-      if (_selectedSize != null && _selectedSize!.isNotEmpty) return true;
-      if (_selectedSex != null && _selectedSex!.isNotEmpty) return true;
-      if (_castrated) return true;
-      if (_dewormed) return true;
-      if (_vaccinated) return true;
-
-      return true;
-    }).toList();
+  void _onCityChanged(String? newCity) {
+    setState(() {
+      _selectedCity = newCity;
+    });
+    _filterProtectors();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    final filtered = _filteredProtectors;
+    if (_isLoading) return const Center(child: CircularProgressIndicator());
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.all(16),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Protetores perto de você',
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            decoration: InputDecoration(
-              hintText: 'Pesquisar',
-              prefixIcon: const Icon(Icons.search),
-              border: _inputBorder(Colors.black),
-              enabledBorder: _inputBorder(Colors.black),
-              focusedBorder: _inputBorder(AppTheme.primaryColor),
-            ),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            'Distância: +${_distance.round()} km',
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-          ),
-          Slider(
-            value: _distance,
-            min: 10,
-            max: 100,
-            divisions: 18,
-            activeColor: AppTheme.primaryColor,
-            onChanged: (value) {
-              setState(() {
-                _distance = value;
-              });
-            },
-          ),
-          const SizedBox(height: 8),
-          ExpansionTile(
-            title: const Text(
-              'Filtros Avançados',
-              style: TextStyle(fontWeight: FontWeight.w600),
-            ),
+          Row(
             children: [
-              _buildDropdown('Espécie', _selectedSpecies, _speciesOptions, (value) {
-                setState(() {
-                  _selectedSpecies = value;
-                });
-              }),
-              const SizedBox(height: 8),
-              _buildDropdown('Porte', _selectedSize, _sizeOptions, (value) {
-                setState(() {
-                  _selectedSize = value;
-                });
-              }),
-              const SizedBox(height: 8),
-              _buildDropdown('Sexo', _selectedSex, _sexOptions, (value) {
-                setState(() {
-                  _selectedSex = value;
-                });
-              }),
-              _buildCheckbox('Castrado', _castrated, (value) {
-                setState(() {
-                  _castrated = value ?? false;
-                });
-              }),
-              _buildCheckbox('Vermifugado', _dewormed, (value) {
-                setState(() {
-                  _dewormed = value ?? false;
-                });
-              }),
-              _buildCheckbox('Vacinado', _vaccinated, (value) {
-                setState(() {
-                  _vaccinated = value ?? false;
-                });
-              }),
-              const SizedBox(height: 8),
+              Expanded(
+                child: DropdownButton<String>(
+                  hint: const Text('Selecione o estado'),
+                  value: _selectedState,
+                  isExpanded: true,
+                  items: _states
+                      .map((state) => DropdownMenuItem(
+                            value: state,
+                            child: Text(state),
+                          ))
+                      .toList(),
+                  onChanged: _onStateChanged,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: DropdownButton<String>(
+                  hint: const Text('Selecione a cidade'),
+                  value: _selectedCity,
+                  isExpanded: true,
+                  items: _cities
+                      .map((city) => DropdownMenuItem(
+                            value: city,
+                            child: Text(city),
+                          ))
+                      .toList(),
+                  onChanged: _cities.isEmpty ? null : _onCityChanged,
+                ),
+              ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           Expanded(
-            child: ListView.builder(
-              itemCount: filtered.length,
-              itemBuilder: (context, index) {
-                final protector = filtered[index];
-                return GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const ProtectorPage()),
-                    );
-                  },
-                  child: Card(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+            child: _filteredProtectors.isEmpty
+                ? Center(
+                    child: Text(
+                      'Nenhum protetor encontrado',
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Theme.of(context).primaryColor,
+                      ),
                     ),
-                    margin: const EdgeInsets.only(bottom: 12),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Row(
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: Image.asset(
-                              protector['image']!,
-                              width: 64,
-                              height: 64,
-                              fit: BoxFit.cover,
+                  )
+                : ListView.builder(
+                    itemCount: _filteredProtectors.length,
+                    itemBuilder: (context, index) {
+                      final protector = _filteredProtectors[index];
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  ProtectorPage(protectorData: protector),
                             ),
+                          );
+                        },
+                        child: Card(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                          margin: const EdgeInsets.only(bottom: 12),
+                          child: Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Row(
                               children: [
-                                Text(
-                                  protector['name']!,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: _buildProtectorImage(protector['image']),
                                 ),
-                                Text(
-                                  protector['type']!,
-                                  style: const TextStyle(fontSize: 14),
-                                ),
-                                Text(
-                                  protector['location']!,
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey,
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        protector['protectorName']?.toString() ??
+                                            'Sem nome',
+                                        style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      Text(
+                                        protector['protectorType']?.toString() ??
+                                            'Tipo desconhecido',
+                                        style:
+                                            const TextStyle(fontSize: 14),
+                                      ),
+                                      Text(
+                                        protector['location']?.toString() ??
+                                            'Localização desconhecida',
+                                        style: const TextStyle(
+                                            fontSize: 12, color: Colors.grey),
+                                      ),
+                                      Text(
+                                        '${(protector['pets'] is List ? (protector['pets'] as List).length : 0)} pets disponíveis',
+                                        style: const TextStyle(
+                                            fontSize: 12, color: Colors.grey),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                        ],
-                      ),
-                    ),
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
-            ),
           ),
         ],
       ),
     );
   }
+}
+
+Widget _buildProtectorImage(String? imagePath) {
+  if (imagePath == null || imagePath.isEmpty) {
+    return Image.asset(
+      'assets/images/default_icon.png',
+      width: 64,
+      height: 64,
+      fit: BoxFit.cover,
+    );
+  }
+  if (imagePath.startsWith('http')) {
+    return Image.network(
+      imagePath,
+      width: 64,
+      height: 64,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => Image.asset(
+        'assets/images/default_icon.png',
+        width: 64,
+        height: 64,
+        fit: BoxFit.cover,
+      ),
+    );
+  }
+  return Image.asset(
+    imagePath,
+    width: 64,
+    height: 64,
+    fit: BoxFit.cover,
+  );
 }

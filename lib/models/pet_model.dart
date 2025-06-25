@@ -39,8 +39,7 @@ class PetModel {
   });
 
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
+    final map = {
       'name': name,
       'species': species.name,
       'size': size.name,
@@ -52,9 +51,17 @@ class PetModel {
       'description': description,
       'adopted': adopted,
       'ownerId': ownerId,
-      'createdAt': createdAt.toIso8601String(),
-      'photos': photos.map((p) => p.toJson()).toList(),
     };
+
+    map['createdAt'] = createdAt.toIso8601String();
+  
+    if (photos.isNotEmpty) {
+      map['photos'] = photos.map((p) => p.url).toList();
+    } else {
+      map['photos'] = [];
+    }
+
+    return map;
   }
 
   factory PetModel.fromJson(Map<String, dynamic> json) {
@@ -71,8 +78,62 @@ class PetModel {
       description: json['description'],
       adopted: json['adopted'],
       ownerId: json['ownerId'],
-      createdAt: DateTime.parse(json['createdAt']),
-      photos: (json['photos'] as List).map((p) => PetPhotoModel.fromJson(p)).toList(),
+      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
+      photos: (json['photos'] as List).map((p) {
+        if (p is String) {
+          return PetPhotoModel(url: p);
+        } else {
+          return PetPhotoModel.fromJson(p);
+        }
+      }).toList(),
     );
+  }
+}
+
+extension PetSpeciesExt on PetSpecies {
+  String get displayName {
+    switch (this) {
+      case PetSpecies.DOG:
+        return 'Cachorro';
+      case PetSpecies.CAT:
+        return 'Gato';
+    }
+  }
+}
+
+extension PetSizeExt on PetSize {
+  String get displayName {
+    switch (this) {
+      case PetSize.SMALL:
+        return 'Pequeno';
+      case PetSize.MEDIUM:
+        return 'Médio';
+      case PetSize.LARGE:
+        return 'Grande';
+    }
+  }
+}
+
+extension PetAgeExt on PetAge {
+  String get displayName {
+    switch (this) {
+      case PetAge.YOUNG:
+        return 'Filhote';
+      case PetAge.ADULT:
+        return 'Adulto';
+      case PetAge.SENIOR:
+        return 'Idoso';
+    }
+  }
+}
+
+extension PetSexExt on PetSex {
+  String get displayName {
+    switch (this) {
+      case PetSex.MALE:
+        return 'Macho';
+      case PetSex.FEMALE:
+        return 'Fêmea';
+    }
   }
 }

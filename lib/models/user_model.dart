@@ -9,7 +9,7 @@ class UserModel {
   final String instagram;
   final String email;
   final String password;
-  final AddressModel? address;  
+  final AddressModel? address;
   final bool isOng;
   final String? profilePicture;
   final List<PetModel> pets;
@@ -38,13 +38,10 @@ class UserModel {
       email: json['email']?.toString() ?? '',
       password: json['password']?.toString() ?? '',
       address: json['address'] != null ? AddressModel.fromJson(json['address']) : null,
-      isOng: json['isOng'] is bool 
-        ? json['isOng'] 
-        : (json['isOng']?.toString().toLowerCase() == 'true'),
+      isOng: json['isOng'] == true || json['isOng']?.toString().toLowerCase() == 'true',
       profilePicture: json['profilePicture']?.toString(),
-      pets: json['pets'] != null
-          ? List<PetModel>.from(
-              (json['pets'] as List).map((x) => PetModel.fromJson(x)))
+      pets: (json['pets'] is List)
+          ? (json['pets'] as List).map((x) => PetModel.fromJson(x)).toList()
           : [],
     );
   }

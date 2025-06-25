@@ -67,36 +67,39 @@ class _PetRegistrationFormState extends State<PetRegistrationForm> {
     setState(() => isSaving = true);
 
     try {
-      List<PetPhotoModel> photosModels = [];
+      List<String> photosBase64 = [];
       for (var file in pickedPhotos) {
         final bytes = await File(file.path).readAsBytes();
-        final base64Image = base64Encode(bytes);
-        photosModels.add(PetPhotoModel(url: 'data:image/png;base64,$base64Image'));
+        photosBase64.add('data:image/png;base64,${base64Encode(bytes)}');
       }
 
-     final pet = PetModel(
-      name: nameController.text.trim(),
-      species: especie == 'Cachorro' ? PetSpecies.DOG : PetSpecies.CAT,
-      size: porte == 'Pequeno'
-          ? PetSize.SMALL
-          : porte == 'Médio'
-              ? PetSize.MEDIUM
-              : PetSize.LARGE,
-      age: idade == 'Filhote'
-          ? PetAge.YOUNG
-          : idade == 'Adulto'
-              ? PetAge.ADULT
-              : PetAge.SENIOR,
-      sex: sexo == 'Macho' ? PetSex.MALE : PetSex.FEMALE,
-      castrated: castrado,
-      dewormed: desverminado,
-      vaccinated: vacinado,
-      description: aboutController.text.trim(),
-      adopted: false,
-      ownerId: userId,
-      createdAt: DateTime.now(),
-      photos: photosModels,
-    );
+      final pet = PetModel(
+        name: nameController.text.trim(),
+        species: especie == 'Cachorro' ? PetSpecies.DOG : PetSpecies.CAT,
+        size: porte == 'Pequeno'
+            ? PetSize.SMALL
+            : porte == 'Médio'
+                ? PetSize.MEDIUM
+                : PetSize.LARGE,
+        age: idade == 'Filhote'
+            ? PetAge.YOUNG
+            : idade == 'Adulto'
+                ? PetAge.ADULT
+                : PetAge.SENIOR,
+        sex: sexo == 'Macho' ? PetSex.MALE : PetSex.FEMALE,
+        castrated: castrado,
+        dewormed: desverminado,
+        vaccinated: vacinado,
+        description: aboutController.text.trim(),
+        adopted: false,
+        ownerId: userId,
+        createdAt: DateTime.now(),
+        photos: pickedPhotos.map((file) {
+          final bytes = File(file.path).readAsBytesSync();
+          final base64Image = base64Encode(bytes);
+          return PetPhotoModel(url: 'data:image/png;base64,$base64Image');
+        }).toList(),
+      );
 
       final provider = Provider.of<PetProvider>(context, listen: false);
       final error = await provider.createPet(pet);
@@ -243,7 +246,6 @@ class _PetRegistrationFormState extends State<PetRegistrationForm> {
               floatingLabelBehavior: FloatingLabelBehavior.always,
             ),
           ),
-          const SizedBox(height: 16),
           Row(
             children: [
               Expanded(
@@ -269,7 +271,7 @@ class _PetRegistrationFormState extends State<PetRegistrationForm> {
                     backgroundColor: Colors.orange,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(4),
                     ),
                   ),
                   child: isSaving

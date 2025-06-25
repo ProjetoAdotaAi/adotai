@@ -1,4 +1,4 @@
- class AddressModel {
+class AddressModel {
   final String id;
   final String cep;
   final String city;
@@ -15,11 +15,11 @@
 
   factory AddressModel.fromJson(Map<String, dynamic> json) {
     return AddressModel(
-      id: json['id'],
-      cep: json['cep'],
-      city: json['city'],
-      state: json['state'],
-      userId: json['userId'],
+      id: json['id']?.toString() ?? '',
+      cep: json['cep']?.toString() ?? '',
+      city: json['city']?.toString() ?? '',
+      state: json['state']?.toString() ?? '',
+      userId: json['userId']?.toString() ?? '',
     );
   }
 
@@ -31,5 +31,10 @@
       'state': state,
       'userId': userId,
     };
+  }
+
+  @override
+  String toString() {
+    return 'AddressModel(id: $id, cep: $cep, city: $city, state: $state, userId: $userId)';
   }
 }

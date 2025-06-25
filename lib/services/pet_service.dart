@@ -5,14 +5,24 @@ class PetService {
   final Api api = Api();
 
   Future<void> createPet(PetModel pet) async {
-    final response = await api.request(
-      '/api/pets',
-      method: 'POST',
-      data: pet.toJson(),
-    );
+    try {
+      final data = pet.toJson();
+      data.remove('id');
 
-    if (response['statusCode'] != 201) {
-      throw Exception('Erro ao criar pet: ${response['message'] ?? 'Status inesperado'}');
+      final response = await api.request(
+        '/api/pets',
+        method: 'POST',
+        data: data,
+      );
+
+      final statusCode = response['statusCode'] ?? 201;
+
+      if (statusCode != 201) {
+        throw Exception('Erro ao criar pet: ${response['message'] ?? 'Status inesperado'}');
+      }
+    } catch (e) {
+      print('Erro na requisição createPet: $e');
+      rethrow;
     }
   }
 

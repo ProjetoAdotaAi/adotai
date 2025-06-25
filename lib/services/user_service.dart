@@ -15,10 +15,19 @@ class UserService {
 
   Future<List<UserModel>> getUsers() async {
     try {
+      print('Iniciando requisição para /api/users');
       final json = await api.request('/api/users', method: 'GET');
+      print('Resposta recebida: $json');
+
       final List data = json is List ? json : json['data'];
-      return data.map((e) => UserModel.fromJson(e)).toList();
+      print('Dados extraídos: $data');
+
+      final users = data.map((e) => UserModel.fromJson(e)).toList();
+      print('Usuários convertidos: $users');
+
+      return users;
     } catch (e) {
+      print('Erro ao buscar usuários: $e');
       rethrow;
     }
   }

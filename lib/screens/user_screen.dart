@@ -1,8 +1,7 @@
 import 'package:adotai/screens/change_password_screen.dart';
-import 'package:adotai/screens/favorite_pets_screen.dart';
-import 'package:adotai/screens/user_pet_list_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../widgets/pet/favorite_pets.dart';
 import '../widgets/user/action_tile.dart';
 import '../widgets/user/user_card.dart';
 import 'adoption_preferences_screen.dart';
@@ -60,7 +59,11 @@ class _UserScreenState extends State<UserScreen> {
                     name: user.name,
                     phone: user.phone,
                     instagram: user.instagram,
-                    location: '${user.address?.city}, ${user.address?.state}',
+                   location: (user.address != null &&
+                        user.address!.city.trim().isNotEmpty &&
+                        user.address!.state.trim().isNotEmpty)
+                  ? '${user.address!.city}, ${user.address!.state}'
+                  : 'Localização não informada',
                     imageUrl: user.profilePicture ?? 'assets/images/default_icon.png',
                     onEdit: () {
                       Navigator.push(
@@ -69,6 +72,7 @@ class _UserScreenState extends State<UserScreen> {
                       );
                     },
                   ),
+                  if (!user.isOng) ...[
                   const SizedBox(height: 12),
                   ActionTile(
                     icon: Icons.filter_alt_outlined,
@@ -80,18 +84,6 @@ class _UserScreenState extends State<UserScreen> {
                       );
                     },
                   ),
-                  if (!user.isOng) ...[
-                    const SizedBox(height: 12),
-                    ActionTile(
-                      icon: Icons.pets,
-                      label: 'Meus Pets',
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const UserPetList()),
-                        );
-                      },
-                    ),
                     const SizedBox(height: 12),
                     ActionTile(
                       icon: Icons.favorite_border,
@@ -99,7 +91,7 @@ class _UserScreenState extends State<UserScreen> {
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const Favorite_pets_screen()),
+                          MaterialPageRoute(builder: (_) => const FavoritePets()),
                         );
                       },
                     ),
