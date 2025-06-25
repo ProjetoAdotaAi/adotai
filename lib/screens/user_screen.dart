@@ -9,6 +9,7 @@ import 'edit_profile_screen.dart';
 import 'help_screen.dart';
 import 'login_screen.dart';
 import '../providers/user_provider.dart';
+import 'user_pet_list_screen.dart';
 
 class UserScreen extends StatefulWidget {
   const UserScreen({super.key});
@@ -92,6 +93,17 @@ class _UserScreenState extends State<UserScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(builder: (_) => const FavoritePets()),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    ActionTile(
+                      icon: Icons.pets,
+                      label: 'Meus Pets',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const UserPetList()),
                         );
                       },
                     ),
