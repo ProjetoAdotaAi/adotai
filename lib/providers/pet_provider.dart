@@ -4,6 +4,7 @@ import '../services/pet_service.dart';
 
 class PetProvider with ChangeNotifier {
   final PetService _petService = PetService();
+
   bool isLoading = false;
   String? errorMessage;
   List<PetModel> pets = [];
@@ -55,9 +56,7 @@ class PetProvider with ChangeNotifier {
 
     try {
       final newPets = await _petService.getPets(page: currentPage, limit: limit);
-      if (newPets.length < limit) {
-        hasMore = false;
-      }
+      if (newPets.length < limit) hasMore = false;
       pets.addAll(newPets);
       currentPage++;
     } catch (e) {
@@ -109,6 +108,75 @@ class PetProvider with ChangeNotifier {
     } catch (e) {
       errorMessage = 'Erro ao deletar pet: ${e.toString()}';
       return errorMessage;
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> loadPetsByOwner(String ownerId, {bool reset = false}) async {
+    if (isLoading) return;
+    if (reset) {
+      currentPage = 1;
+      hasMore = true;
+      pets = [];
+      notifyListeners();
+    }
+    if (!hasMore) return;
+
+    isLoading = true;
+    errorMessage = null;
+    notifyListeners();
+
+    try {
+      final newPets = await _petService.getPetsByOwner(ownerId, page: currentPage, limit: limit);
+      if (newPets.length < limit) hasMore = false;
+      pets.addAll(newPets);
+      currentPage++;
+    } catch (e) {
+      errorMessage = 'Erro ao carregar pets do dono: ${e.toString()}';
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> searchPetsByPreferences({
+    bool? isOng,
+    List<String>? species,
+    List<String>? ageCategory,
+    List<String>? sex,
+    List<String>? size,
+    bool reset = false,
+  }) async {
+    if (isLoading) return;
+    if (reset) {
+      currentPage = 1;
+      hasMore = true;
+      pets = [];
+      notifyListeners();
+    }
+    if (!hasMore) return;
+
+    isLoading = true;
+    errorMessage = null;
+    notifyListeners();
+
+    try {
+      final newPets = await _petService.searchPetsByPreferences(
+        isOng: isOng,
+        species: species,
+        ageCategory: ageCategory,
+        sex: sex,
+        size: size,
+        page: currentPage,
+        limit: limit,
+      );
+      if (newPets.length < limit) hasMore = false;
+      pets.addAll(newPets);
+      currentPage++;
+    } catch (e) {
+      errorMessage = 'Erro ao buscar pets por preferências: ${e.toString()}';
     } finally {
       isLoading = false;
       notifyListeners();

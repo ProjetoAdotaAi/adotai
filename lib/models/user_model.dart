@@ -37,11 +37,16 @@ class UserModel {
       instagram: json['instagram']?.toString() ?? '',
       email: json['email']?.toString() ?? '',
       password: json['password']?.toString() ?? '',
-      address: json['address'] != null ? AddressModel.fromJson(json['address']) : null,
+      address: json['address'] is Map<String, dynamic>
+          ? AddressModel.fromJson(json['address'])
+          : null,
       isOng: json['isOng'] == true || json['isOng']?.toString().toLowerCase() == 'true',
       profilePicture: json['profilePicture']?.toString(),
       pets: (json['pets'] is List)
-          ? (json['pets'] as List).map((x) => PetModel.fromJson(x)).toList()
+          ? (json['pets'] as List)
+              .where((x) => x is Map<String, dynamic>)
+              .map((x) => PetModel.fromJson(x as Map<String, dynamic>))
+              .toList()
           : [],
     );
   }
@@ -63,6 +68,6 @@ class UserModel {
 
   @override
   String toString() {
-    return 'UserModel(id: $id, firebaseId: $firebaseId, name: $name, phone: $phone, instagram: $instagram, email: $email, isOng: $isOng, profilePicture: $profilePicture, address: ${address.toString()}, pets: ${pets.length})';
+    return 'UserModel(id: $id, firebaseId: $firebaseId, name: $name, phone: $phone, instagram: $instagram, email: $email, isOng: $isOng, profilePicture: $profilePicture, address: $address, pets: ${pets.length})';
   }
 }

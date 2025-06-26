@@ -25,12 +25,18 @@ class _HomeScreenState extends State<HomeScreen> {
     final user = userProvider.currentUser;
     bool isOng = user?.isOng ?? false;
 
-    final List<Widget> pages = [
-      const SwipeScreen(),
-      const ProtectorsFilterWidget(),
-      isOng ? const UserPetList() : const FavoritePets(),
-      const UserScreen(),
-    ];
+    final List<Widget> pages = isOng
+        ? [
+            const ProtectorsFilterWidget(),
+            if (user != null) UserPetList(ownerId: user.id) else const SizedBox(),
+            const UserScreen(),
+          ]
+        : [
+            const SwipeScreen(),
+            const ProtectorsFilterWidget(),
+            const FavoritePets(),
+            const UserScreen(),
+          ];
 
     return Scaffold(
       appBar: const CustomAppBar(),
@@ -39,11 +45,8 @@ class _HomeScreenState extends State<HomeScreen> {
           : pages[_currentIndex],
       bottomNavigationBar: CustomNavigationBar(
         currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
+        onTap: (index) => setState(() => _currentIndex = index),
+        isOng: isOng,
       ),
     );
   }

@@ -56,6 +56,7 @@ class _ProtectorsFilterWidgetState extends State<ProtectorsFilterWidget> {
               'longitude': loc.longitude,
               'pets': user.pets,
               'description': user.name,
+              'ownerId': user.id,
             });
           }
         } catch (_) {}
@@ -71,7 +72,7 @@ class _ProtectorsFilterWidgetState extends State<ProtectorsFilterWidget> {
     });
   }
 
-  void _filterProtectors() {
+  void _applyFilters() {
     List<Map<String, dynamic>> filtered = _allProtectors;
 
     if (_selectedState != null) {
@@ -103,15 +104,21 @@ class _ProtectorsFilterWidgetState extends State<ProtectorsFilterWidget> {
           ..sort();
       }
     });
-
-    _filterProtectors();
   }
 
   void _onCityChanged(String? newCity) {
     setState(() {
       _selectedCity = newCity;
     });
-    _filterProtectors();
+  }
+
+  void _clearFilters() {
+    setState(() {
+      _selectedState = null;
+      _selectedCity = null;
+      _cities = [];
+      _filteredProtectors = List.from(_allProtectors);
+    });
   }
 
   @override
@@ -152,6 +159,36 @@ class _ProtectorsFilterWidgetState extends State<ProtectorsFilterWidget> {
                       .toList(),
                   onChanged: _cities.isEmpty ? null : _onCityChanged,
                 ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: Theme.of(context).primaryColor),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  foregroundColor: Theme.of(context).primaryColor,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                ),
+                onPressed: _applyFilters,
+                child: const Text('Aplicar filtros'),
+              ),
+              const SizedBox(width: 12),
+              OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: Theme.of(context).primaryColor),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  foregroundColor: Theme.of(context).primaryColor,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                ),
+                onPressed: _clearFilters,
+                child: const Text('Limpar filtros'),
               ),
             ],
           ),
@@ -215,11 +252,6 @@ class _ProtectorsFilterWidgetState extends State<ProtectorsFilterWidget> {
                                       Text(
                                         protector['location']?.toString() ??
                                             'Localização desconhecida',
-                                        style: const TextStyle(
-                                            fontSize: 12, color: Colors.grey),
-                                      ),
-                                      Text(
-                                        '${(protector['pets'] is List ? (protector['pets'] as List).length : 0)} pets disponíveis',
                                         style: const TextStyle(
                                             fontSize: 12, color: Colors.grey),
                                       ),

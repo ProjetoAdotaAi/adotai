@@ -35,8 +35,8 @@ class _SwipeScreenState extends State<SwipeScreen> with SingleTickerProviderStat
       final interactionProvider = Provider.of<InteractionProvider>(context, listen: false);
       final petProvider = Provider.of<PetProvider>(context, listen: false);
 
-      await petProvider.loadPets();
       await interactionProvider.loadAllUserInteractions();
+      await petProvider.loadPets(reset: true);
 
       setState(() {
         currentIndex = 0;
@@ -82,11 +82,6 @@ class _SwipeScreenState extends State<SwipeScreen> with SingleTickerProviderStat
   Widget build(BuildContext context) {
     return Consumer2<PetProvider, InteractionProvider>(
       builder: (context, petProvider, interactionProvider, _) {
-        final allPets = petProvider.pets;
-        final interactedPetIds = interactionProvider.interactedPetIds;
-
-        final filteredPets = allPets.where((p) => !interactedPetIds.contains(p.id)).toList();
-
         if (petProvider.isLoading || interactionProvider.isLoading) {
           return const Scaffold(body: Center(child: CircularProgressIndicator()));
         }
@@ -101,6 +96,10 @@ class _SwipeScreenState extends State<SwipeScreen> with SingleTickerProviderStat
             ),
           );
         }
+
+        final allPets = petProvider.pets;
+        final interactedPetIds = interactionProvider.interactedPetIds;
+        final filteredPets = allPets.where((p) => !interactedPetIds.contains(p.id)).toList();
 
         if (filteredPets.isEmpty || currentIndex >= filteredPets.length) {
           return Scaffold(
