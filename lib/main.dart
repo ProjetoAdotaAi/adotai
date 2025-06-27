@@ -1,17 +1,22 @@
 import 'dart:io';
-import 'package:adotai/providers/forgotPassword_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
+
+// Providers
+import 'providers/forgotPassword_provider.dart';
 import '../providers/auth_provider.dart' as local;
 import '../providers/user_provider.dart';
 import '../providers/pet_provider.dart';
 import 'providers/interaction_provider.dart';
 import 'providers/report_provider.dart';
+import 'services/notification_service.dart';
+
+// Screens e Outros
 import 'screens/splash_screen.dart';
-import '../theme/app_theme.dart';
+import 'theme/app_theme.dart';
 import 'services/auth_service.dart';
 import 'services/push_notification_service.dart';
 import 'utils/api.dart';
@@ -43,6 +48,8 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => InteractionProvider()),
         ChangeNotifierProvider(create: (_) => ReportProvider()),
+        ChangeNotifierProvider(create: (_) => PetProvider()),
+        ChangeNotifierProvider(create: (_) => NotificationService()),
         ChangeNotifierProxyProvider<UserProvider, local.AuthProvider>(
           create: (context) => local.AuthProvider(
             authService: AuthService(api: api),
@@ -53,7 +60,6 @@ class MyApp extends StatelessWidget {
             userProvider: userProvider,
           ),
         ),
-        ChangeNotifierProvider(create: (_) => PetProvider()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

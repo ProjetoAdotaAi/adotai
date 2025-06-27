@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/pet_model.dart';
-import '../../providers/user_provider.dart';
 import '../report/reportDialog.dart';
-import 'package:provider/provider.dart';
 
 class SwipeCard extends StatefulWidget {
   final PetModel pet;
@@ -153,15 +151,28 @@ class _SwipeCardState extends State<SwipeCard> {
                           ),
                           const SizedBox(height: 12),
                           Align(
-                            alignment: Alignment.centerLeft,
-                            child: TextButton(
+                            alignment: Alignment.centerRight,
+                            child: IconButton(
                               onPressed: () {
                                 showReportDialog(context, pet.id!);
                               },
-                              child: const Text(
-                                'Denunciar publicação',
-                                style: TextStyle(color: Colors.white),
+                              style: IconButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                side: const BorderSide(
+                                  color: Color(0xFFF4A261), // Borda laranja
+                                  width: 2,
+                                ),
+                                padding: const EdgeInsets.all(8),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
                               ),
+                              icon: const Icon(
+                                Icons.warning,
+                                color: Color(0xFFF4A261), // Laranja do AdotaAI
+                                size: 24,
+                              ),
+                              tooltip: 'Denunciar publicação',
                             ),
                           ),
                         ],

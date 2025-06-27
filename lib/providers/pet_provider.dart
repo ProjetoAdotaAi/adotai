@@ -96,6 +96,13 @@ class PetProvider with ChangeNotifier {
     }
   }
 
+  // Remove um pet da lista local (usado após reports bem-sucedidos)
+  void removePetById(String id) {
+    pets.removeWhere((p) => p.id == id);
+    _interactedPetIds.remove(id); // Remove também da lista de interagidos
+    notifyListeners();
+  }
+
   Future<String?> deletePet(String id) async {
     isLoading = true;
     errorMessage = null;

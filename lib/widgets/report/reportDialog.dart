@@ -1,4 +1,5 @@
 import 'package:adotai/providers/report_provider.dart';
+import 'package:adotai/providers/pet_provider.dart';
 import 'package:flutter/material.dart';
 import '../../providers/user_provider.dart';
 import 'package:provider/provider.dart';
@@ -48,12 +49,22 @@ void showReportDialog(BuildContext context, String petId) {
 
                         // Mostra o feedback
                         if (success) {
+                          // Remove o pet da lista local após report bem-sucedido
+                          final petProvider = Provider.of<PetProvider>(context, listen: false);
+                          petProvider.removePetById(petId);
+                          
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Denúncia enviada com sucesso!')),
+                            const SnackBar(
+                              content: Text('Denúncia enviada com sucesso! O pet foi removido da lista.'),
+                              backgroundColor: Colors.green,
+                            ),
                           );
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(reportProvider.errorMessage ?? 'Ocorreu um erro.')),
+                            SnackBar(
+                              content: Text(reportProvider.errorMessage ?? 'Ocorreu um erro ao enviar a denúncia.'),
+                              backgroundColor: Colors.red,
+                            ),
                           );
                         }
                       },
