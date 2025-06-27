@@ -33,9 +33,12 @@ class UserService {
   }
 
   Future<UserModel?> getUserById(String id) async {
-      final json = await api.request('/api/users/$id', method: 'GET');
-      final user = UserModel.fromJson(json);
-      return user;
+    print('[API] Buscando usuário pelo ID: $id');
+    final json = await api.request('/api/users/$id', method: 'GET');
+    print('[API] Resposta bruta: $json');
+    final user = UserModel.fromJson(json);
+    print('[API] Usuário convertido: ${user.toJson()}');
+    return user;
   }
 
   Future<String?> updateUser(String id, Map<String, dynamic> updatedData) async {

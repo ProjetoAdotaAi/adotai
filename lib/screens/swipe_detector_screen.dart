@@ -137,7 +137,7 @@ class _SwipeScreenState extends State<SwipeScreen> with SingleTickerProviderStat
         final bottomPadding = MediaQuery.of(context).padding.bottom;
 
         return Scaffold(
-          backgroundColor: Colors.grey[200],
+          backgroundColor: Theme.of(context).primaryColor,
           body: Stack(
             children: [
               SafeArea(

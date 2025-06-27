@@ -37,9 +37,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   void initState() {
     super.initState();
+
+    _nameController = TextEditingController();
+    _emailController = TextEditingController();
+    _phoneController = TextEditingController();
+    _instagramController = TextEditingController();
+    _cepController = TextEditingController();
+    _cityController = TextEditingController();
+    _stateController = TextEditingController();
+
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-    
     final user = userProvider.currentUser;
+
     if (user == null) {
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         setState(() => _loading = true);
@@ -54,6 +63,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         _stateController.text = loadedUser?.address?.state ?? '';
         setState(() => _loading = false);
       });
+    } else {
+      _nameController.text = user.name;
+      _emailController.text = user.email;
+      _phoneController.text = user.phone;
+      _instagramController.text = user.instagram;
+      _cepController.text = user.address?.cep ?? '';
+      _cityController.text = user.address?.city ?? '';
+      _stateController.text = user.address?.state ?? '';
     }
   }
 

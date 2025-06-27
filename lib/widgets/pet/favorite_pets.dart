@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../models/interaction_type.dart';
+import '../../models/pet_model.dart';
 import '../../providers/interaction_provider.dart';
 import 'favorite_pet_card.dart';
 
@@ -19,6 +21,29 @@ class _FavoritePetsState extends State<FavoritePets> {
       Provider.of<InteractionProvider>(context, listen: false)
           .loadUserInteractions(InteractionType.FAVORITED);
     });
+  }
+
+  void _showFixedContactDialog(BuildContext context, PetModel pet) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text(pet.name),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Fechar'),
+          ),
+          ElevatedButton.icon(
+            icon: const Icon(Icons.message),
+            label: const Text('Mandar WhatsApp'),
+            onPressed: () {
+              final url = 'https://wa.me/5545998328541';
+              launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+            },
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -80,7 +105,11 @@ class _FavoritePetsState extends State<FavoritePets> {
                               childAspectRatio: 1,
                             ),
                             itemBuilder: (context, index) {
-                              return FavoritePetCard(pet: pets[index]);
+                              final pet = pets[index];
+                              return GestureDetector(
+                                onTap: () => _showFixedContactDialog(context, pet),
+                                child: FavoritePetCard(pet: pet),
+                              );
                             },
                           ),
                         ),
