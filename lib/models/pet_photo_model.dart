@@ -13,10 +13,10 @@ class PetPhotoModel {
 
   factory PetPhotoModel.fromJson(Map<String, dynamic> json) {
     return PetPhotoModel(
-      id: json['id'],
-      url: json['url'],
-      publicId: json['publicId'],
-      petId: json['petId'],
+      id: json['id']?.toString(),
+      url: json['url']?.toString() ?? '',
+      publicId: json['publicId']?.toString(),
+      petId: json['petId']?.toString(),
     );
   }
 

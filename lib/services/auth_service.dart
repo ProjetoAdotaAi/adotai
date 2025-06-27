@@ -9,6 +9,8 @@ class AuthService {
   Future<Map<String, dynamic>> login(String email, String password) async {
     final data = {'email': email, 'password': password};
 
+    print('[Login] Enviando dados de login: $data');
+
     try {
       final response = await api.request(
         '/api/login',
@@ -16,15 +18,21 @@ class AuthService {
         data: data,
       );
 
+      print('[Login] Resposta recebida: $response');
+
       if (response.containsKey('token') && response.containsKey('user')) {
+        print('[Login] Login bem-sucedido. Token e usuário presentes.');
         return {
           'token': response['token'],
           'user': response['user'],
         };
       } else {
+        print('[Login] Erro: Resposta incompleta do servidor');
         throw Exception('Resposta incompleta do servidor');
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('[Login] Exceção capturada: $e');
+      print('[Login] Stack trace:\n$stackTrace');
       rethrow;
     }
   }

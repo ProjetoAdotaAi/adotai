@@ -17,7 +17,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   bool obscurePassword = true;
-  bool _isMounted = true;
 
   void togglePasswordVisibility() {
     setState(() {
@@ -27,7 +26,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   void dispose() {
-    _isMounted = false;
     emailController.dispose();
     passwordController.dispose();
     super.dispose();
@@ -35,8 +33,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final authProvider = context.watch<AuthProvider>();
-
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(gradient: AppTheme.primaryGradient),
@@ -86,101 +82,103 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: authProvider.isLoading
-                          ? null
-                          : () async {
-                              final email = emailController.text.trim();
-                              final password = passwordController.text.trim();
-                              final auth = context.read<AuthProvider>();
+                    Consumer<AuthProvider>(
+                      builder: (_, authProvider, __) {
+                        return ElevatedButton(
+                          onPressed: authProvider.isLoading
+                              ? null
+                              : () async {
+                                  final email = emailController.text.trim();
+                                  final password = passwordController.text.trim();
+                                  final auth = context.read<AuthProvider>();
 
-                              await auth.login(email, password);
+                                  await auth.login(email, password);
+                                  if (!mounted) return;
 
-                              if (!_isMounted) return;
-
-                              if (auth.errorMessage != null) {
-                                if (!mounted) return;
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text(auth.errorMessage!)),
-                                );
-                              } else if (auth.token != null) {
-                                if (!mounted) return;
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => const SplashScreen(fromLogin: true),
-                                  ),
-                                );
-                              }
-                            },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.primaryColor,
-                        fixedSize: const Size(220, 50),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                      ),
-                      child: authProvider.isLoading
-                          ? const CircularProgressIndicator(color: Colors.white)
-                          : const Text(
-                              'Entrar',
-                              style: TextStyle(color: Colors.white, fontSize: 18),
+                                  if (auth.errorMessage != null) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text(auth.errorMessage!)),
+                                    );
+                                  } else if (auth.token != null) {
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => const SplashScreen(fromLogin: true),
+                                      ),
+                                    );
+                                  }
+                                },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppTheme.primaryColor,
+                            fixedSize: const Size(220, 50),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
                             ),
+                          ),
+                          child: authProvider.isLoading
+                              ? const CircularProgressIndicator(color: Colors.white)
+                              : const Text(
+                                  'Entrar',
+                                  style: TextStyle(color: Colors.white, fontSize: 18),
+                                ),
+                        );
+                      },
                     ),
                     const SizedBox(height: 20),
-                    OutlinedButton(
-                      onPressed: authProvider.isLoading
-                          ? null
-                          : () async {
-                              final auth = context.read<AuthProvider>();
+                    Consumer<AuthProvider>(
+                      builder: (_, authProvider, __) {
+                        return OutlinedButton(
+                          onPressed: authProvider.isLoading
+                              ? null
+                              : () async {
+                                  final auth = context.read<AuthProvider>();
 
-                              await auth.loginWithGoogle();
+                                  await auth.loginWithGoogle();
+                                  if (!mounted) return;
 
-                              if (!_isMounted) return;
-
-                              if (auth.errorMessage != null) {
-                                if (!mounted) return;
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text(auth.errorMessage!)),
-                                );
-                              } else if (auth.token != null) {
-                                if (!mounted) return;
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => const SplashScreen(fromLogin: true),
-                                  ),
-                                );
-                              }
-                            },
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(
-                          color: Colors.orange,
-                          width: 2,
-                        ),
-                        fixedSize: const Size(220, 50),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Image.asset(
-                            'assets/images/google.png',
-                            width: 20,
-                            height: 20,
-                          ),
-                          const SizedBox(width: 10),
-                          const Text(
-                            'Entrar com Google',
-                            style: TextStyle(
+                                  if (auth.errorMessage != null) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text(auth.errorMessage!)),
+                                    );
+                                  } else if (auth.token != null) {
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => const SplashScreen(fromLogin: true),
+                                      ),
+                                    );
+                                  }
+                                },
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(
                               color: Colors.orange,
-                              fontSize: 14,
+                              width: 2,
+                            ),
+                            fixedSize: const Size(220, 50),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
                             ),
                           ),
-                        ],
-                      ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Image.asset(
+                                'assets/images/google.png',
+                                width: 20,
+                                height: 20,
+                              ),
+                              const SizedBox(width: 10),
+                              const Text(
+                                'Entrar com Google',
+                                style: TextStyle(
+                                  color: Colors.orange,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
                     ),
                     const SizedBox(height: 30),
                     const Row(

@@ -4,25 +4,24 @@ import '../theme/app_theme.dart';
 import '../widgets/home/appbar.dart';
 import '../widgets/preferences/filter_options.dart';
 
-class AdoptionPreferncesScreen extends StatefulWidget {
-  const AdoptionPreferncesScreen({super.key});
+class AdoptionPreferencesScreen extends StatefulWidget {
+  const AdoptionPreferencesScreen({super.key});
 
   @override
-  _AdoptionPreferncesScreenState createState() => _AdoptionPreferncesScreenState();
+  _AdoptionPreferencesScreenState createState() => _AdoptionPreferencesScreenState();
 }
 
-class _AdoptionPreferncesScreenState extends State<AdoptionPreferncesScreen> {
+class _AdoptionPreferencesScreenState extends State<AdoptionPreferencesScreen> {
   List<String> postadoPor = [];
   List<String> especie = [];
   List<String> idade = [];
   List<String> sexo = [];
   List<String> porte = [];
 
-  final List<String> postadoPorOptions = ['ONG', 'Protetores Individuais'];
   final List<String> especieOptions = ['Gato', 'Cachorro'];
-  final List<String> sexoOptions = ['Masculino', 'Feminino'];
+  final List<String> sexoOptions = ['Macho', 'Fêmea'];
   final List<String> porteOptions = ['Pequeno', 'Médio', 'Grande'];
-  final List<String> idadeOptions = ['Filhote', 'Adulto'];
+  final List<String> idadeOptions = ['Filhote', 'Adulto', 'Idoso'];
 
   @override
   void initState() {
@@ -31,7 +30,7 @@ class _AdoptionPreferncesScreenState extends State<AdoptionPreferncesScreen> {
   }
 
   Future<void> _loadPreferences() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final prefs = await SharedPreferences.getInstance();
     setState(() {
       postadoPor = prefs.getStringList('postadoPor') ?? [];
       especie = prefs.getStringList('especie') ?? [];
@@ -42,7 +41,7 @@ class _AdoptionPreferncesScreenState extends State<AdoptionPreferncesScreen> {
   }
 
   Future<void> _savePreferences() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList('postadoPor', postadoPor);
     await prefs.setStringList('especie', especie);
     await prefs.setStringList('idade', idade);
@@ -55,113 +54,64 @@ class _AdoptionPreferncesScreenState extends State<AdoptionPreferncesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(hasBackButton: true),
+      appBar: const CustomAppBar(hasBackButton: true),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Center(
-              child: const Text(
+            const Center(
+              child: Text(
                 'Preferências para adoção',
                 style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
               ),
             ),
             const SizedBox(height: 16),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Postado Por:', style: TextStyle(color: AppTheme.cinza, fontSize: 26, fontWeight: FontWeight.bold)),
-                FilterButtonWidget(
-                  selectedOptions: postadoPor,
-                  options: postadoPorOptions,
-                  onSelectionChanged: (selected) {
-                    setState(() {
-                      postadoPor = selected;
-                    });
-                  },
-                ),
-              ],
-            ),
+            _buildFilterSection('Espécie:', especie, especieOptions, (selected) {
+              setState(() => especie = selected);
+            }),
             const SizedBox(height: 16),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Espécie:', style: TextStyle(color: AppTheme.cinza, fontSize: 26, fontWeight: FontWeight.bold)),
-                FilterButtonWidget(
-                  selectedOptions: especie,
-                  options: especieOptions,
-                  onSelectionChanged: (selected) {
-                    setState(() {
-                      especie = selected;
-                    });
-                  },
-                ),
-              ],
-            ),
+            _buildFilterSection('Idade:', idade, idadeOptions, (selected) {
+              setState(() => idade = selected);
+            }),
             const SizedBox(height: 16),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Idade:', style: TextStyle(color: AppTheme.cinza, fontSize: 26, fontWeight: FontWeight.bold)),
-                FilterButtonWidget(
-                  selectedOptions: idade,
-                  options: idadeOptions,
-                  onSelectionChanged: (selected) {
-                    setState(() {
-                      idade = selected;
-                    });
-                  },
-                ),
-              ],
-            ),
+            _buildFilterSection('Sexo:', sexo, sexoOptions, (selected) {
+              setState(() => sexo = selected);
+            }),
             const SizedBox(height: 16),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Sexo:', style: TextStyle(color: AppTheme.cinza, fontSize: 26, fontWeight: FontWeight.bold)),
-                FilterButtonWidget(
-                  selectedOptions: sexo,
-                  options: sexoOptions,
-                  onSelectionChanged: (selected) {
-                    setState(() {
-                      sexo = selected;
-                    });
-                  },
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Porte:', style: TextStyle(color: AppTheme.cinza, fontSize: 26, fontWeight: FontWeight.bold)),
-                FilterButtonWidget(
-                  selectedOptions: porte,
-                  options: porteOptions,
-                  onSelectionChanged: (selected) {
-                    setState(() {
-                      porte = selected;
-                    });
-                  },
-                ),
-              ],
-            ),
+            _buildFilterSection('Porte:', porte, porteOptions, (selected) {
+              setState(() => porte = selected);
+            }),
             const SizedBox(height: 32),
             ElevatedButton(
               onPressed: _savePreferences,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.gradientStart,
                 padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6),
-                ),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
               ),
-              child: const Text('Salvar Preferências', style: TextStyle(color: Colors.white, fontSize: 22),),
+              child: const Text(
+                'Salvar Preferências',
+                style: TextStyle(color: Colors.white, fontSize: 22),
+              ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildFilterSection(String title, List<String> selectedOptions, List<String> options, Function(List<String>) onSelectionChanged) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title, style: TextStyle(color: AppTheme.cinza, fontSize: 26, fontWeight: FontWeight.bold)),
+        FilterButtonWidget(
+          selectedOptions: selectedOptions,
+          options: options,
+          onSelectionChanged: onSelectionChanged,
+        ),
+      ],
     );
   }
 }

@@ -39,7 +39,8 @@ class PetModel {
   });
 
   Map<String, dynamic> toJson() {
-    final map = {
+    return {
+      if (id != null) 'id': id,
       'name': name,
       'species': species.name,
       'size': size.name,
@@ -51,41 +52,39 @@ class PetModel {
       'description': description,
       'adopted': adopted,
       'ownerId': ownerId,
+      'createdAt': createdAt.toIso8601String(),
+      'photos': photos.map((p) => p.toJson()).toList(),
     };
-
-    map['createdAt'] = createdAt.toIso8601String();
-  
-    if (photos.isNotEmpty) {
-      map['photos'] = photos.map((p) => p.url).toList();
-    } else {
-      map['photos'] = [];
-    }
-
-    return map;
   }
 
   factory PetModel.fromJson(Map<String, dynamic> json) {
     return PetModel(
-      id: json['id'],
-      name: json['name'],
-      species: PetSpecies.values.firstWhere((e) => e.name == json['species']),
-      size: PetSize.values.firstWhere((e) => e.name == json['size']),
-      age: PetAge.values.firstWhere((e) => e.name == json['age']),
-      sex: PetSex.values.firstWhere((e) => e.name == json['sex']),
-      castrated: json['castrated'],
-      dewormed: json['dewormed'],
-      vaccinated: json['vaccinated'],
-      description: json['description'],
-      adopted: json['adopted'],
-      ownerId: json['ownerId'],
-      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
-      photos: (json['photos'] as List).map((p) {
-        if (p is String) {
-          return PetPhotoModel(url: p);
-        } else {
-          return PetPhotoModel.fromJson(p);
-        }
-      }).toList(),
+      id: json['id']?.toString(),
+      name: json['name']?.toString() ?? '',
+      species: PetSpecies.values.firstWhere((e) => e.name == json['species'], orElse: () => PetSpecies.DOG),
+      size: PetSize.values.firstWhere((e) => e.name == json['size'], orElse: () => PetSize.MEDIUM),
+      age: PetAge.values.firstWhere((e) => e.name == json['age'], orElse: () => PetAge.ADULT),
+      sex: PetSex.values.firstWhere((e) => e.name == json['sex'], orElse: () => PetSex.MALE),
+      castrated: json['castrated'] == true,
+      dewormed: json['dewormed'] == true,
+      vaccinated: json['vaccinated'] == true,
+      description: json['description']?.toString() ?? '',
+      adopted: json['adopted'] == true,
+      ownerId: json['ownerId']?.toString() ?? '',
+      createdAt: json['createdAt'] != null
+          ? DateTime.tryParse(json['createdAt'].toString()) ?? DateTime.now()
+          : DateTime.now(),
+      photos: (json['photos'] is List)
+          ? (json['photos'] as List).map((p) {
+              if (p is String) {
+                return PetPhotoModel(url: p);
+              } else if (p is Map<String, dynamic>) {
+                return PetPhotoModel.fromJson(p);
+              } else {
+                return PetPhotoModel(url: '');
+              }
+            }).toList()
+          : [],
     );
   }
 }

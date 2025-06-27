@@ -124,6 +124,7 @@ class _SwipeCardState extends State<SwipeCard> {
                       opacity: widget.detailsHeight / maxDetailsHeight,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
                             pet.name,
@@ -140,7 +141,7 @@ class _SwipeCardState extends State<SwipeCard> {
                                 fontSize: 16, color: Colors.grey),
                           ),
                           const SizedBox(height: 16),
-                          Expanded(
+                          Flexible(
                             child: SingleChildScrollView(
                               child: Text(
                                 pet.description,

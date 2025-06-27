@@ -81,7 +81,7 @@ class UserProvider with ChangeNotifier {
       return 'Erro: $e';
     }
   }
-
+  
   Future<void> loadUser(String id) async {
     isLoading = true;
     errorMessage = null;
@@ -99,6 +99,8 @@ class UserProvider with ChangeNotifier {
       }
     } catch (e) {
       errorMessage = 'Erro ao carregar usuário: $e';
+      _currentUser = null;
+      await _saveUserToPrefs(null);
     }
 
     isLoading = false;
